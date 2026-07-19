@@ -104,10 +104,11 @@
   .nav-btn.active svg{opacity:1;}
   .nav-btn.active::after{
     content:'';
-    position:absolute; right:12px; top:50%; transform:translateY(-50%);
-    width:6px; height:6px; border-radius:50%;
-    background:var(--wine-bright);
-    box-shadow:0 0 8px var(--wine-bright);
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    width:18px; height:11px;
+    background-image:url('bat.png');
+    background-size:contain; background-repeat:no-repeat; background-position:center;
+    filter: drop-shadow(0 0 1px #ff3b5c) drop-shadow(0 0 3px #a3132f) drop-shadow(0 0 5px #6e0d25);
   }
 
   .sidebar-foot{
