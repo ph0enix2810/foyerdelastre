@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foyer de l'Astre — Vespera</title>
+<title>NOX SEPULCHRA — Elyndor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -209,7 +209,7 @@
     font-family:'Cinzel', serif; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase;
     color:var(--gold-dim); text-align:right; margin-bottom:28px;
   }
-  .hero .eyebrow{color:#cfc4d8}
+  .hero .eyebrow{color:#cfc4d8;}
   .hero h2.title{font-size:3.4rem;}
   .drip{width:100%; height:22px; margin-top:22px; opacity:.85;}
 
@@ -334,6 +334,35 @@
     color:var(--gold); display:block; margin-bottom:5px;
   }
   .fiche-field .fvalue{ font-size:.92rem; color:var(--ash); font-style:italic; line-height:1.65; }
+
+  /* ---- Carte géographique ---- */
+  .map-card{
+    grid-column:1/-1;
+    position:relative;
+    overflow:hidden;
+    min-height:520px;
+    border:1px solid var(--card-line);
+    background:linear-gradient(160deg, var(--card), #0e0a11);
+  }
+  .map-card svg.map-illustration, .map-card img.map-illustration{
+    position:absolute; inset:0; width:100%; height:100%;
+  }
+  .map-card::before{
+    content:'';
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(90deg, rgba(10,7,16,.97) 0%, rgba(10,7,16,.88) 22%, rgba(10,7,16,.45) 42%, rgba(10,7,16,.05) 58%, transparent 70%);
+  }
+  .map-text{
+    position:relative; z-index:2;
+    padding:36px 34px; max-width:330px;
+  }
+  .map-text h3{ font-family:'Cinzel Decorative', serif; font-size:1.3rem; color:var(--parchment); margin:6px 0 12px; }
+  .map-text p{ font-size:.88rem; color:var(--ash); line-height:1.7; margin-bottom:18px; }
+  .map-legend{ display:flex; flex-direction:column; gap:10px; }
+  .map-legend-item{ display:flex; align-items:center; gap:10px; font-size:.8rem; color:var(--parchment); }
+  .map-legend-item .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .map-legend-item .dot.dashed{ border-radius:50%; border:1.5px dashed var(--ash); width:9px; height:9px; background:none; }
+  .map-legend-item .sub{ display:block; font-size:.72rem; color:var(--ash); font-style:italic; }
   .btn{
     display:inline-block; margin-top:18px;
     font-family:'Cinzel', serif; font-size:.78rem; letter-spacing:.14em; text-transform:uppercase;
@@ -368,6 +397,9 @@
     .hero-banner-text .title{font-size:1.9rem;}
     .figure-feature{grid-template-columns:1fr; gap:20px;}
     .figure-portrait{aspect-ratio:16/10; max-width:280px; margin:0 auto;}
+    .map-card{min-height:340px;}
+    .map-card::before{background:linear-gradient(180deg, rgba(10,7,16,.97) 0%, rgba(10,7,16,.85) 35%, rgba(10,7,16,.2) 60%, transparent 78%);}
+    .map-text{max-width:100%; padding:24px;}
   }
 </style>
 </head>
@@ -382,7 +414,7 @@
     <div class="crest">
       <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1"><path d="M12 2C9 6 6 8 3 8c0 6 4 10 9 14 5-4 9-8 9-14-3 0-6-2-9-6z"/><path d="M12 8v8M9 11l3-3 3 3" stroke="#6e0d25"/></svg>
       <h1>Foyer<br>de l'Astre</h1>
-      <span>Continent d'Elyndor</span>
+      <span>Continent de Ravenhold</span>
     </div>
 
     <nav>
@@ -412,7 +444,7 @@
       </button>
     </nav>
 
-    <div class="sidebar-foot">Établi en l'an des Ombres</div>
+    <div class="sidebar-foot">Établi en l'an 1458</div>
   </aside>
 
   <!-- ===== CONTENU ===== -->
@@ -426,7 +458,7 @@
           <div class="hero-banner-text">
             <div class="eyebrow">Bienvenue, voyageur</div>
             <h2 class="title">Foyer de l'Astre</h2>
-            <p class="subtitle">Sur le continent d'Elyndor, la magie coule dans les rivières et sommeille au cœur des montagnes. Humains, elfes, vampires, démons, lycanthropes et bien d'autres peuples s'y disputent terres, reliques et pouvoir — rares sont les endroits où l'on peut vraiment parler de paix.</p>
+            <p class="subtitle">En 1458, sur le continent de Ravenhold, la magie coule dans les rivières et sommeille au cœur des montagnes. Humains, elfes, vampires, démons, lycanthropes et bien d'autres peuples s'y disputent terres, reliques et pouvoir — rares sont les endroits où l'on peut vraiment parler de paix.</p>
           </div>
         </div>
         <p class="hero-caption">Le Foyer de l'Astre, dominant la vallée de Vespera</p>
@@ -439,7 +471,7 @@
         </div>
       </div>
 
-      <p class="lore">Au nord du continent s'étend Nivéra, royaume figé dans un hiver éternel. Loin des capitales et des guerres, la cité de Vespera y prospère au pied d'une forteresse aux vitraux écarlates — le Foyer de l'Astre, fondé par une femme sans passé que tous appellent simplement Mère.</p>
+      <p class="lore">Au nord du pays d'Elyndor s'étend Vespera, village figé dans un hiver éternel. Loin des capitales et des guerres, le village y prospère au pied d'une forteresse aux vitraux écarlates — le Foyer de l'Astre, fondé par une femme sans passé que tous appellent simplement Mère.</p>
       <p class="lore italic">« Une Ombre n'est pas un assassin, mais un protecteur. » — philosophie du Foyer de l'Astre.</p>
 
       <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l8-4 8 4M4 18l8 4 8-4"/></svg></div>
@@ -451,11 +483,11 @@
     <section class="panel" id="pacte">
       <div class="eyebrow">Contexte</div>
       <h2 class="title">Le Pacte</h2>
-      <p class="subtitle">Elyndor, un monde où la magie coule dans chaque être vivant — et où la puissance décide souvent du destin des peuples.</p>
+      <p class="subtitle">Ravenhold, un monde où la magie coule dans chaque être vivant — et où la puissance décide souvent du destin des peuples.</p>
 
-      <p class="lore">Le continent d'Elyndor est un monde où la magie est omniprésente. Elle coule dans les rivières, sommeille au cœur des montagnes et imprègne chaque être vivant. Depuis des millénaires, elle façonne les civilisations, nourrit les plus grands royaumes et donne naissance à une multitude de peuples. Humains, elfes, vampires, démons, dragons, lycanthropes, esprits et bien d'autres races coexistent tant bien que mal, chacune possédant sa propre culture, ses traditions et sa manière de manipuler le mana.</p>
+      <p class="lore">Le continent de <strong>Ravenhold</strong> est un monde où la magie est omniprésente. Elle coule dans les rivières, sommeille au cœur des montagnes et imprègne chaque être vivant. Depuis des millénaires, elle façonne les civilisations, nourrit les plus grands royaumes et donne naissance à une multitude de peuples. Humains, elfes, vampires, démons, dragons, lycanthropes, esprits et bien d'autres races coexistent tant bien que mal, chacune possédant sa propre culture, ses traditions et sa manière de manipuler le mana.</p>
       <p class="lore">Si la magie permet d'accomplir des merveilles, elle est également la source d'innombrables conflits. Les royaumes se disputent les terres les plus riches en énergie magique, les anciennes reliques attirent les convoitises et les créatures les plus dangereuses continuent de rôder dans les régions oubliées du continent. Dans un monde où la puissance décide souvent du destin des peuples, rares sont les endroits où l'on peut réellement parler de paix.</p>
-      <p class="lore">Au nord d'Elyndor s'étend le royaume de <strong>Nivéra</strong>, une terre figée dans un hiver éternel. Les montagnes y dominent l'horizon, les forêts de conifères semblent infinies et la neige recouvre les vallées sans jamais totalement disparaître. Malgré ce climat rude, une cité prospère au cœur de cette immensité blanche, loin des grandes capitales et des guerres qui agitent le reste du continent : <strong>Vespera</strong>.</p>
+      <p class="lore">Au nord du pays d'Elyndor s'étend le village de <strong>Vespera</strong>, une terre figée dans un hiver éternel. Les montagnes y dominent l'horizon, les forêts de conifères semblent infinies et la neige recouvre les vallées sans jamais totalement disparaître. Malgré ce climat rude, ce village cité prospère au cœur de cette immensité blanche, loin des grandes capitales et des guerres qui agitent le reste du continent.
 
       <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
 
@@ -472,7 +504,7 @@
       <div class="eyebrow" style="margin-top:0;">Capitale de l'Empire</div>
       <h3 style="font-family:'Cinzel', serif; font-size:1.4rem; color:var(--parchment); margin-bottom:16px;">Astrevia</h3>
 
-      <p class="lore">Au cœur du continent se dresse Astrevia, capitale d'un empire où coexistent, sous une même autorité, quatre grands peuples : Humains, Sorcières, Loups-Garous et Vampires. Derrière la façade éclatante de ses académies et de ses marchés, le pouvoir s'y joue dans l'ombre, entre familles nobles conservatrices et alliances d'intérêt.</p>
+      <p class="lore">Au cœur du pays voisin, Noctis, se dresse Astrevia, capitale d'un empire où coexistent, sous une même autorité, quatre grands peuples : Humains, Sorcières, Loups-Garous et Vampires. Derrière la façade éclatante de ses académies et de ses marchés, le pouvoir s'y joue dans l'ombre, entre familles nobles conservatrices et alliances d'intérêt.</p>
       <p class="lore">C'est dans ce contexte qu'<strong>Asuna Ténébris</strong> s'est forgé une réputation, s'imposant par ses propres mérites là où beaucoup ne voyaient qu'une femme destinée à servir une grande famille. Sa popularité grandissante finit par inquiéter une partie de la haute hiérarchie, qui chercha à faire d'elle un instrument politique. Asuna refusa. Puis, un jour, sans avertissement ni trace, elle disparut.</p>
       <p class="lore italic">À Vespera, personne ne connaît cette histoire — pour ses enfants, Asuna est simplement la fondatrice du Foyer. Mais à Astrevia, certains n'ont jamais cessé de la chercher, et sont bien décidés à ramener chez eux celle qu'ils considèrent encore comme l'une des plus importantes figures de l'Empire.</p>
 
@@ -482,7 +514,7 @@
       <div class="rules-list">
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>La magie imprègne tout Elyndor et façonne autant les civilisations que les conflits entre royaumes.</p></div>
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Vespera, au nord, vit à l'ombre protectrice du Foyer de l'Astre et de ses Ombres.</p></div>
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Astrevia, la capitale impériale, n'a jamais renoncé à retrouver Asuna Ténébris.</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Astrevia, la capitale impériale et de Noctis, n'a jamais renoncé à retrouver Asuna Ténébris.</p></div>
       </div>
     </section>
 
@@ -627,12 +659,26 @@
     <section class="panel" id="territoires">
       <div class="eyebrow">Géographie du sang</div>
       <h2 class="title">Les Territoires</h2>
-      <p class="subtitle">Vespera, le Foyer de l'Astre bâti au-dessus d'elle, et Astrevia, la capitale impériale — les rôles précis de chaque territoire restent à définir.</p>
+      <p class="subtitle">Vespera, le Foyer de l'Astre bâti au-dessus d'elle, et Astrevia, la capitale impériale et de Noctis — les rôles précis de chaque territoire restent à définir.</p>
 
       <div class="grid">
 
+        <div class="map-card">
+          <img class="map-illustration" src="Elyndor.png" alt="Carte du continent avec Vespera et Astrevia entourées en rouge" style="object-fit:cover; object-position:50% 42%;">
+
+          <div class="map-text">
+            <div class="eyebrow">Cartographie</div>
+            <h3>Ravenhold</h3>
+            <p>Vespera se dresse au nord, dans le froid d'Elyndor, tandis qu'Astrevia domine le cœur du continent, au sud — les deux cités clés de l'intrigue, repérées en rouge sur la carte.</p>
+            <div class="map-legend">
+              <div class="map-legend-item"><span class="dot" style="background:#c8ae1c;"></span><span>Vespera <span class="sub">Au nord — Foyer de l'Astre</span></span></div>
+              <div class="map-legend-item"><span class="dot" style="background:#c81c3f;"></span><span>Astrevia <span class="sub">Au sud — capitale de l'Empire</span></span></div>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
-          <span class="card-tag">Royaume de Nivéra</span>
+          <span class="card-tag">Village d'Elyndor</span>
           <h3>Vespera</h3>
           <div class="meta">Ambiance : hiver éternel, refuge &amp; famille</div>
           <p>Cité de pierre noire réchauffée par ses cheminées, nichée au creux d'une vallée enneigée. Ses rues pavées restent animées en toute saison — marchés, auberges et voyageurs de passage — sous le regard silencieux du Foyer de l'Astre, dressé sur la falaise qui domine la ville.</p>
@@ -656,7 +702,7 @@
         </div>
 
         <div class="card">
-          <span class="card-tag">Capitale de l'Empire</span>
+          <span class="card-tag">Capitale du pays de Noctis</span>
           <h3>Astrevia</h3>
           <div class="meta">Ambiance : politique impériale, quatre peuples</div>
           <p>Cité grandiose au cœur du continent, où Humains, Sorcières, Loups-Garous et Vampires coexistent sous une même autorité fragile. Académies de magie, marchés opulents et complots de palais s'y côtoient.</p>
@@ -684,7 +730,7 @@
             <div class="meta" style="margin-top:4px;">Fondatrice du Foyer de l'Astre — « Mère »</div>
             <p class="lore" style="margin-top:16px; max-width:100%;">Personne ne sait réellement qui est Asuna Ténébris. Elle arriva un jour, seule, aux portes de Vespera — sans escorte, sans bagages, sans passé. Aucune archive, aucune famille noble, aucun érudit n'a jamais retrouvé trace de son existence avant ce jour. Les rumeurs vont bon train : ancienne souveraine, survivante d'une guerre oubliée, vampire, ou membre d'une race disparue. Asuna ne confirme ni ne dément jamais rien.</p>
             <p class="lore" style="max-width:100%;">Ce qui ne fait aucun doute, c'est que Vespera lui doit sa sécurité : depuis son arrivée, les monstres évitent la vallée et nul n'a jamais osé s'en prendre deux fois au château. Derrière son apparence froide se cache une femme qui connaît le prénom, l'histoire et les peurs de chacun de ses enfants — qu'elle éduque à la magie, à la stratégie et au combat, sans jamais leur imposer une seule voie.</p>
-            <p class="lore italic" style="max-width:100%; margin-bottom:0;">Ce que personne à Vespera ne sait : à Astrevia, capitale de l'Empire, certains n'ont jamais cessé de la chercher — et comptent bien la ramener chez eux le jour où ils la retrouveront.</p>
+            <p class="lore italic" style="max-width:100%; margin-bottom:0;">Ce que personne à Vespera ne sait : à Astrevia, capitale du pays voisin, certains n'ont jamais cessé de la chercher — et comptent bien la ramener chez eux le jour où ils la retrouveront.</p>
           </div>
           <div class="figure-portrait">
             <img src="asuna-portrait.png" alt="Portrait d'Asuna Ténébris, aux longs cheveux noirs et yeux rouges, vêtue de noir devant une cathédrale gothique">
@@ -700,8 +746,8 @@
         <div class="figure-feature">
           <div>
             <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
-            <h3 style="font-size:1.4rem;">Roi d'Astrevia</h3>
-            <div class="meta" style="margin-top:4px;">Astrevia — Souverain de l'Empire</div>
+            <h3 style="font-size:1.4rem;">Roi de Noctis</h3>
+            <div class="meta" style="margin-top:4px;">Astrevia — Souverain du pays</div>
             <p class="lore" style="margin-top:14px; max-width:100%; font-style:normal;">À la tête de l'Empire et de ses quatre peuples, le Roi d'Astrevia règne sur un équilibre aussi fragile que la loyauté de sa cour. C'est aussi lui — ou son entourage — qui n'a jamais cessé de chercher Asuna Ténébris.</p>
 
             <div style="margin-top:22px;">
@@ -753,17 +799,17 @@
 
       <div class="join-box">
         <h3>Rejoindre le serveur Discord</h3>
-        <p style="color:var(--ash); font-size:.92rem; line-height:1.7;"></p>
-        <a href="https://discord.gg/RGt86hCP3A" class="btn">Lien du serveur →</a>
+        <p style="color:var(--ash); font-size:.92rem; line-height:1.7;">Lorem ipsum dolor sit amet, consectetur adipiscing elit — lien d'invitation à ajouter ici.</p>
+        <a href="#" class="btn">Lien du serveur →</a>
       </div>
 
       <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l8-4 8 4M4 18l8 4 8-4"/></svg></div>
 
       <p class="lore"><strong>Avant d'entrer :</strong></p>
       <div class="rules-list">
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Valider le règlement</p></div>
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Lisez les informations du RP</p></div>
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Faites votre fiche et commencez l'aventure !</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Lorem ipsum dolor sit amet — première règle à préciser (respect, activité minimale, etc.).</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Consectetur adipiscing elit — deuxième règle, format des fiches de personnage attendu.</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Sed do eiusmod tempor — troisième règle, validation par le staff avant de rejoindre une ville.</p></div>
       </div>
     </section>
 
