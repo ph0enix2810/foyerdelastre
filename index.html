@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foyer de l'Astre — Elyndor</title>
-<link rel="icon" type="image/png" href="bat.png">
+<title>NOX SEPULCHRA — Elyndor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -108,7 +107,7 @@
     width:18px; height:11px;
     background-image:url('bat.png');
     background-size:contain; background-repeat:no-repeat; background-position:center;
-    filter: drop-shadow(0 0 1px #ff3b5c) drop-shadow(0 0 3px #a3132f) drop-shadow(0 0 5px #6e0d25);
+    filter: drop-shadow(0 0 2px #ff3b5c) drop-shadow(0 0 5px #a3132f) drop-shadow(0 0 9px #6e0d25);
   }
 
   .sidebar-foot{
@@ -263,6 +262,23 @@
 
   /* ---- Races ---- */
   .race-emoji{ font-size:1.7rem; display:block; margin-bottom:10px; }
+  .race-lore{ font-size:.85rem; color:var(--ash); font-style:italic; line-height:1.65; margin:14px 0 0; padding-top:14px; border-top:1px solid var(--card-line); }
+
+  /* ---- Cycle lunaire ---- */
+  .moon-card{ padding:0; overflow:hidden; display:flex; flex-direction:column; }
+  .moon-card-img{ width:100%; height:190px; position:relative; overflow:hidden; flex-shrink:0; }
+  .moon-card-img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .moon-card-img::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,7,16,0) 55%, rgba(10,7,16,.95) 100%);
+  }
+  .moon-card-body{ padding:22px 24px 26px; }
+  .moon-card-body h3{ font-family:'Cinzel', serif; font-size:1.28rem; color:var(--parchment); margin:2px 0 8px; }
+  .moon-card-body .desc{ font-size:.88rem; color:var(--ash); line-height:1.7; margin-bottom:16px; font-style:italic; }
+  .moon-effects{ list-style:none; display:flex; flex-direction:column; gap:7px; }
+  .moon-effects li{ font-size:.83rem; color:var(--ash); line-height:1.55; padding-left:15px; position:relative; }
+  .moon-effects li::before{ content:'—'; position:absolute; left:0; color:var(--gold-dim); }
+  .moon-card.red .moon-effects li::before{ color:var(--wine-bright); }
   .trait-block{ margin-bottom:14px; }
   .trait-block:last-child{ margin-bottom:0; }
   .trait-block .lbl{
@@ -432,6 +448,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="9" cy="9" r="5"/><circle cx="15" cy="9" r="5"/><circle cx="12" cy="15" r="5"/></svg>
         Les Peuples
       </button>
+      <button class="nav-btn" data-panel="lune">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M20 12a8 8 0 1 1-8-8 6.5 6.5 0 0 0 8 8z"/></svg>
+        Cycle Lunaire
+      </button>
       <button class="nav-btn" data-panel="territoires">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 21V10l4-3 4 3v11M11 21V6l4-3 4 3v15"/></svg>
         Les Territoires
@@ -537,6 +557,7 @@
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Espérance de vie : 70 à 100 ans</li><li>Pas de capacité raciale particulière</li><li>Plus fragiles physiquement que plusieurs autres races</li></ul>
           </div>
+          <p class="race-lore">Les humains sont la race la plus répandue de Ravenhold. Dépourvus de capacités raciales particulières, ils compensent par leur grande faculté d'adaptation, leur créativité et leur diversité culturelle. On les retrouve dans l'ensemble des royaumes du continent, où ils occupent tous les rôles de la société.</p>
         </div>
 
         <div class="card">
@@ -548,10 +569,11 @@
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Espérance de vie : 400 à 600 ans</li><li>Plus fragiles physiquement</li><li>Vieillissent très lentement mais restent mortels</li><li>Pas de magie naturellement plus puissante que les autres</li></ul>
           </div>
+          <p class="race-lore">Les elfes sont une race ancienne réputée pour son élégance, sa sagesse et son lien naturel avec la magie. Leur perception exceptionnelle et leur maîtrise des arts mystiques en font d'excellents érudits et archers. Ils vivent généralement en communautés isolées, à l'écart des grandes cités.</p>
         </div>
 
         <div class="card">
-          <span class="race-emoji">🦇</span>
+          <span class="race-emoji">🧛</span>
           <h3>Vampires</h3>
           <div class="trait-block forces"><span class="lbl">Points forts</span>
             <ul><li>Force et vitesse supérieures</li><li>Régénération modérée</li><li>Vie très longue</li></ul>
@@ -559,21 +581,23 @@
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Besoin de sang régulièrement</li><li>Le soleil les affaiblit fortement</li><li>La régénération ne fonctionne pas sur les blessures mortelles</li><li>Espérance de vie : jusqu'à 1 000 ans</li></ul>
           </div>
+          <p class="race-lore">Les vampires sont des êtres nocturnes à la longévité exceptionnelle, dotés de sens surdéveloppés et d'une force physique supérieure à la moyenne. Bien que souvent craints, tous ne sont pas hostiles aux autres peuples. Leur société est organisée en grandes familles et anciennes lignées, principalement établies à Astrevia.</p>
         </div>
 
         <div class="card">
           <span class="race-emoji">🐺</span>
-          <h3>Loups-Garous</h3>
+          <h3>Lycans</h3>
           <div class="trait-block forces"><span class="lbl">Points forts</span>
             <ul><li>Grande force</li><li>Endurance élevée</li><li>Sens très développés</li></ul>
           </div>
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Transformation non illimitée</li><li>Une forme bestiale prolongée fatigue énormément</li><li>Difficulté à contrôler leurs émotions lors de fortes colères</li></ul>
           </div>
+          <p class="race-lore">Les lycans sont une race robuste capable d'adopter une forme bestiale. Réputés pour leur instinct, leur endurance et leur loyauté envers leur meute, ils entretiennent un lien profond avec la lune. Malgré leur réputation de guerriers, beaucoup mènent une vie paisible au sein de leurs clans.</p>
         </div>
 
         <div class="card">
-          <span class="race-emoji">🔮</span>
+          <span class="race-emoji">🧙</span>
           <h3>Sorcières</h3>
           <div class="trait-block forces"><span class="lbl">Points forts</span>
             <ul><li>Grande maîtrise des sorts</li><li>Rituels</li><li>Alchimie</li><li>Enchantements</li></ul>
@@ -581,6 +605,7 @@
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Physiquement comparables à un humain</li><li>Beaucoup de sorts nécessitent préparation ou concentration</li><li>Une forte consommation de mana entraîne un épuisement</li></ul>
           </div>
+          <p class="race-lore">Les sorcières sont des mages ayant consacré leur vie à l'étude des arcanes. Contrairement aux idées reçues, elles ne naissent pas avec une magie particulière, mais développent leurs pouvoirs par le savoir, l'entraînement et la maîtrise des grimoires. Elles sont présentes dans la plupart des royaumes, où elles occupent souvent le rôle d'érudites, d'alchimistes ou de conseillères.</p>
         </div>
 
         <div class="card">
@@ -609,7 +634,7 @@
         </div>
 
         <div class="card">
-          <span class="race-emoji">👹</span>
+          <span class="race-emoji">😈</span>
           <h3>Démons</h3>
           <div class="trait-block forces"><span class="lbl">Points forts</span>
             <ul><li>Grande puissance magique</li><li>Résistance aux malédictions</li><li>Charisme naturel</li></ul>
@@ -617,17 +642,19 @@
           <div class="trait-block limites"><span class="lbl">Limites</span>
             <ul><li>Sensibles à certaines magies sacrées</li><li>Leur puissance magique demande énormément d'énergie</li><li>Pas d'immortalité</li><li>Apparence démoniaque pouvant provoquer la méfiance</li></ul>
           </div>
+          <p class="race-lore">Les démons sont des êtres originaires d'un autre plan d'existence, dont la magie est souvent plus instable et destructrice que celle des autres races. Longtemps redoutés, ils ne sont pourtant pas tous malveillants et possèdent leurs propres cultures, traditions et hiérarchies. Leur présence sur Ravenhold demeure relativement rare.</p>
         </div>
 
         <div class="card">
-          <span class="race-emoji">👻</span>
-          <h3>Esprits</h3>
+          <span class="race-emoji">👼</span>
+          <h3>Anges</h3>
           <div class="trait-block forces"><span class="lbl">Points forts</span>
-            <ul><li>Très sensibles à la magie</li><li>Grande perception</li><li>Longévité exceptionnelle</li></ul>
+            <ul><li>Très bonne affinité avec la magie sacrée</li><li>Excellents soigneurs et protecteurs</li><li>Résistance aux malédictions et aux illusions (sauf en cas d'événement lunaire)</li></ul>
           </div>
           <div class="trait-block limites"><span class="lbl">Limites</span>
-            <ul><li>Corps bien réel : ils peuvent être blessés et tués</li><li>Pas de traversée des murs ni d'invisibilité permanente</li><li>Faibles physiquement</li><li>Espérance de vie : plusieurs siècles</li></ul>
+            <ul><li>Espérance de vie : 500 à 800 ans</li><li>Pouvoirs moins efficaces dans les lieux corrompus ou démoniaques, et lorsque le soleil n'est pas présent</li><li>Très attachés aux règles et à leur devoir</li></ul>
           </div>
+          <p class="race-lore">Race ancienne née de la lumière primordiale, les anges sont principalement présents à Astrevia, où ils servent les institutions religieuses et agissent comme gardiens de la paix. Leur proximité avec le pouvoir leur vaut cependant d'être largement méprisés par une partie de la basse classe de la cité.</p>
         </div>
 
         <div class="card">
@@ -654,6 +681,79 @@
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Les hybrides entre plusieurs races ne sont pas autorisés, sauf cas exceptionnel validé par le staff.</p></div>
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Aucun personnage n'est immortel — même les races les plus longévives peuvent mourir de blessures, de maladies ou de vieillesse.</p></div>
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Les capacités raciales ne remplacent pas l'entraînement : un personnage devient puissant grâce à son expérience, pas uniquement grâce à sa race.</p></div>
+      </div>
+    </section>
+
+    <!-- === CYCLE LUNAIRE === -->
+    <section class="panel" id="lune">
+      <div class="eyebrow">Astres &amp; magie</div>
+      <h2 class="title">Cycle Lunaire de Ravenhold</h2>
+      <p class="subtitle">La lune influence les créatures et la magie d'Elyndor. Toutes les 20h00, le cycle lunaire évolue et ses effets se répercutent sur le monde.</p>
+
+      <div class="grid">
+
+        <div class="moon-card card">
+          <div class="moon-card-img"><img src="moon-none.png" alt="Ciel nocturne sans aucune lune visible, uniquement des étoiles"></div>
+          <div class="moon-card-body">
+            <span class="card-tag">2 jours</span>
+            <h3>Nuit sans Lune</h3>
+            <p class="desc">La lune disparaît entièrement du ciel. Une obscurité inhabituelle recouvre les terres.</p>
+            <ul class="moon-effects">
+              <li>Les êtres magiques ressentent une diminution de leur puissance</li>
+              <li>Les sorts demandent davantage d'efforts à être lancés</li>
+              <li>Les créatures surnaturelles se fatiguent plus rapidement</li>
+              <li>Les reliques magiques semblent moins réactives</li>
+              <li>Les humains sont très peu affectés</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="moon-card card">
+          <div class="moon-card-img"><img src="moon-half.png" alt="Fin croissant de lune éclairé, partiellement voilé par les nuages"></div>
+          <div class="moon-card-body">
+            <span class="card-tag">2 jours</span>
+            <h3>Demi-Lune</h3>
+            <p class="desc">La lumière lunaire retrouve progressivement son éclat. Le monde retrouve son équilibre.</p>
+            <ul class="moon-effects">
+              <li>Les races non liées directement à la lune (Humains, Elfes, Sorcières, Drakéides, Chimères...) ressentent un regain d'énergie</li>
+              <li>La concentration est facilitée</li>
+              <li>Les voyageurs trouvent plus facilement leur chemin</li>
+              <li>Les magies élémentaires semblent plus stables</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="moon-card card">
+          <div class="moon-card-img"><img src="moon-full.jpeg" alt="Pleine lune éclatante entourée de nuages sombres"></div>
+          <div class="moon-card-body">
+            <span class="card-tag">3 jours</span>
+            <h3>Pleine Lune</h3>
+            <p class="desc">La lune éclaire intensément Elyndor. Les forêts deviennent dangereuses une fois la nuit tombée.</p>
+            <ul class="moon-effects">
+              <li>Les Lycans se transforment automatiquement dès la tombée de la nuit</li>
+              <li>Leur force, leur vitesse et leurs instincts sont considérablement accrus</li>
+              <li>Les créatures sauvages deviennent plus agressives</li>
+              <li>Les routes nocturnes sont réputées extrêmement dangereuses</li>
+              <li>Les villages renforcent leurs défenses jusqu'au lever du soleil</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="moon-card card red">
+          <div class="moon-card-img"><img src="moon-red.gif" alt="Lune rouge écarlate se levant derrière des silhouettes de branches"></div>
+          <div class="moon-card-body">
+            <span class="card-tag">1 jour</span>
+            <h3>Lune Rouge</h3>
+            <p class="desc">Un phénomène rare — on ne sait jamais quand il arrive — et redouté. La lune prend une teinte écarlate qui glace le sang des plus courageux.</p>
+            <ul class="moon-effects">
+              <li>Les Vampires atteignent l'apogée de leur puissance</li>
+              <li>Leur vitesse, leur régénération et leur magie sont renforcées</li>
+              <li>Leur soif de sang devient plus difficile à contrôler</li>
+              <li>Les anciens artefacts vampiriques peuvent réagir à cette lune</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -735,7 +835,7 @@
             <p class="lore italic" style="max-width:100%; margin-bottom:0;">Ce que personne à Vespera ne sait : à Astrevia, capitale du pays voisin, certains n'ont jamais cessé de la chercher — et comptent bien la ramener chez eux le jour où ils la retrouveront.</p>
           </div>
           <div class="figure-portrait">
-            <img src="asunaomg.png" alt="Portrait d'Asuna Ténébris, aux longs cheveux noirs et yeux rouges, vêtue de noir devant une cathédrale gothique">
+            <img src="asuna-portrait.png" alt="Portrait d'Asuna Ténébris, aux longs cheveux noirs et yeux rouges, vêtue de noir devant une cathédrale gothique">
           </div>
         </div>
       </div>
@@ -794,7 +894,7 @@
     </section>
 
     <!-- === REJOINDRE === -->
-    <section class="panel" id="rejoindre">
+     <section class="panel" id="rejoindre">
       <div class="eyebrow">Franchir le seuil</div>
       <h2 class="title">Rejoindre</h2>
       <p class="subtitle">Ce qu'il faut savoir avant de commencer votre aventure magique.</p>
