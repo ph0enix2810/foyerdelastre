@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Foyer de l'Astre — Elyndor</title>
+<link rel="icon" type="image/png" href="bat.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -391,6 +392,47 @@
   }
   .btn:hover{ background:var(--wine-bright); box-shadow:0 0 20px rgba(163,19,47,.45); }
 
+  .card-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Cinzel', serif; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold); background:none; border:none; border-bottom:1px solid var(--gold-dim);
+    padding:2px 0; cursor:pointer; transition:color .2s ease, border-color .2s ease;
+  }
+  .card-link:hover{ color:var(--wine-bright); border-color:var(--wine-bright); }
+  .card-link svg{ width:13px; height:13px; transition:transform .2s ease; }
+  .card-link:hover svg{ transform:translateX(3px); }
+
+  /* ---- Page détail d'un lieu ---- */
+  .back-link{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Cinzel', serif; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ash); background:none; border:none; cursor:pointer;
+    margin-bottom:26px; padding:0; transition:color .2s ease;
+  }
+  .back-link:hover{ color:var(--parchment); }
+  .back-link svg{ width:14px; height:14px; }
+  .lieu-banner{
+    position:relative; width:100%; height:420px; overflow:hidden;
+    border:1px solid var(--card-line); margin-bottom:32px;
+  }
+  .lieu-banner img{ width:100%; height:100%; object-fit:cover; display:block; filter:saturate(1.05) contrast(1.03); }
+  .lieu-banner.placeholder{
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px;
+    background:linear-gradient(160deg, var(--card), #0e0a11);
+    border:1px dashed var(--gold-dim);
+  }
+  .lieu-banner.placeholder svg{ width:44px; height:44px; opacity:.4; }
+  .lieu-banner.placeholder span{
+    font-family:'Cinzel', serif; font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-dim);
+  }
+  .lieu-banner::before{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,7,16,0) 45%, rgba(10,7,16,.92) 100%);
+  }
+  .lieu-banner-text{ position:absolute; left:36px; right:36px; bottom:24px; z-index:2; }
+  .lieu-banner-text .eyebrow{ color:var(--wine-bright); text-shadow:0 2px 8px rgba(0,0,0,.85); }
+  .lieu-banner-text h2{ text-shadow:0 4px 20px rgba(0,0,0,.9); margin-bottom:0; }
+
   .rules-list{ margin-top:30px; display:flex; flex-direction:column; gap:14px; max-width:700px;}
   .rule{ display:flex; gap:14px; align-items:flex-start;}
   .rule svg{width:16px; height:16px; margin-top:4px; flex-shrink:0; color:var(--gold);}
@@ -418,6 +460,8 @@
     .map-card{min-height:340px;}
     .map-card::before{background:linear-gradient(180deg, rgba(10,7,16,.97) 0%, rgba(10,7,16,.85) 35%, rgba(10,7,16,.2) 60%, transparent 78%);}
     .map-text{max-width:100%; padding:24px;}
+    .lieu-banner{height:260px;}
+    .lieu-banner-text{left:20px; right:20px; bottom:16px;}
   }
 </style>
 </head>
@@ -579,7 +623,7 @@
             <ul><li>Force et vitesse supérieures</li><li>Régénération modérée</li><li>Vie très longue</li></ul>
           </div>
           <div class="trait-block limites"><span class="lbl">Limites</span>
-            <ul><li>Parfois besoin de sang pour garder leur vigueur</li><li>Le soleil les affaiblit</li><li>La régénération ne fonctionne pas sur les blessures mortelles</li><li>Espérance de vie : jusqu'à 1 000 ans</li></ul>
+            <ul><li>Besoin de sang régulièrement</li><li>Le soleil les affaiblit fortement</li><li>La régénération ne fonctionne pas sur les blessures mortelles</li><li>Espérance de vie : jusqu'à 1 000 ans</li></ul>
           </div>
           <p class="race-lore">Les vampires sont des êtres nocturnes à la longévité exceptionnelle, dotés de sens surdéveloppés et d'une force physique supérieure à la moyenne. Bien que souvent craints, tous ne sont pas hostiles aux autres peuples. Leur société est organisée en grandes familles et anciennes lignées, principalement établies à Astrevia.</p>
         </div>
@@ -633,7 +677,6 @@
           </div>
           <p class="race-note">✔️ Vision nocturne, griffes, bonne ouïe — ❌ cracher du feu, voler à Mach 2, cumuler toutes les capacités animales.</p>
           <p class="race-lore">Les chimères sont des êtres hybrides possédant des caractéristiques héritées d'une espèce animale. Chaque individu naît avec une combinaison unique de traits physiques et de capacités instinctives, faisant de cette race l'une des plus variées de Ravenhold. Présentes aux quatre coins du continent, les chimères vivent aussi bien parmi les autres peuples qu'au sein de leurs propres communautés, où elles valorisent la liberté et leur lien avec leur nature animale.</p>
-
         </div>
 
         <div class="card">
@@ -793,6 +836,7 @@
             <div class="role-row"><span class="rname">Marchand / Aubergiste</span><span class="rslots">à définir</span></div>
             <div class="role-row"><span class="rname">Voyageur de passage</span><span class="rslots">à définir</span></div>
           </div>
+          <button class="card-link" data-goto="lieu-vespera" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </div>
 
         <div class="card">
@@ -805,6 +849,7 @@
             <div class="role-row"><span class="rname">Enfant du Foyer</span><span class="rslots">à définir</span></div>
             <div class="role-row"><span class="rname">Aîné(e) formateur/trice</span><span class="rslots">à définir</span></div>
           </div>
+          <button class="card-link" data-goto="lieu-foyer" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </div>
 
         <div class="card">
@@ -817,9 +862,107 @@
             <div class="role-row"><span class="rname">Agent en quête d'Asuna</span><span class="rslots">à définir</span></div>
             <div class="role-row"><span class="rname">Érudit d'académie</span><span class="rslots">à définir</span></div>
           </div>
+          <button class="card-link" data-goto="lieu-astrevia" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </div>
 
       </div>
+    </section>
+
+    <!-- === LIEU : VESPERA === -->
+    <section class="panel" id="lieu-vespera">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><path d="M4 21V10l4-3 4 3v11M11 21V6l4-3 4 3v15"/></svg>
+        <span>Image de Vespera à ajouter (fichier attendu : vespera-banner.jpg)</span>
+      </div>
+      <div style="margin:-14px 0 32px;">
+        <div class="eyebrow">Royaume d'Elyndor — Nord de Ravenhold</div>
+        <h2 class="title" style="font-size:2.6rem;">Vespera</h2>
+      </div>
+
+      <p class="lore">Vespera est un village reculé, niché au creux d'une vallée enneigée au pied des montagnes du nord d'Elyndor. Bâti en pierre noire et réchauffé par d'innombrables cheminées, il vit toute l'année sous un hiver qui ne semble jamais vouloir céder sa place. Malgré ce climat rude, les rues pavées restent animées quelle que soit la saison : les marchés accueillent aussi bien des marchands venus des royaumes voisins que des aventuriers, des mages ou des voyageurs cherchant un endroit où reprendre des forces avant de poursuivre leur route.</p>
+
+      <p class="lore">Loin des grandes capitales et des guerres qui agitent le reste du continent, Vespera dégage une atmosphère étonnamment chaleureuse pour un lieu si isolé. Les habitants se connaissent tous, les enfants jouent dans les rues enneigées, et les portes des auberges restent ouvertes jusque tard dans la nuit. Depuis presque n'importe quel endroit du village, il suffit de lever les yeux pour apercevoir la silhouette du Foyer de l'Astre, dressé au sommet de la falaise qui domine toute la vallée — un repère si familier qu'il est devenu, avec le temps, le véritable symbole de Vespera.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Administration</div>
+      <p class="lore">Vespera est administré par un <strong>Gouverneur</strong>, chargé de veiller à l'ordre et à la prospérité du village — gestion des marchés, arbitrage des différends, entretien des routes en hiver — tout en composant en permanence avec la présence discrète mais omniprésente du Foyer de l'Astre qui surplombe la cité. Le poste, actuellement vacant, reste l'un des rôles les plus influents que l'on puisse tenir à Vespera <em>(voir la fiche disponible dans La Cour)</em>.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Vivre à Vespera</div>
+      <p class="lore">La majorité des habitants sont des Humains, mais Vespera reste ouvert à tous les peuples d'Elyndor — le froid ne fait pas de distinction. Marchands, aubergistes, chasseurs et artisans y tiennent boutique, tandis que les voyageurs de passage y trouvent toujours une auberge où poser leurs affaires avant de reprendre la route. Beaucoup d'habitants entretiennent une relation particulière avec le Foyer : certains y ont grandi, d'autres lui doivent tout simplement leur vie, épargnés par les monstres qui rôdaient jadis dans la vallée avant l'arrivée d'Asuna.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === LIEU : LE FOYER DE L'ASTRE === -->
+    <section class="panel" id="lieu-foyer">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><path d="M4 21V10l4-3 4 3v11M11 21V6l4-3 4 3v15"/></svg>
+        <span>Image du Foyer de l'Astre à ajouter (fichier attendu : foyer-banner.jpg)</span>
+      </div>
+      <div style="margin:-14px 0 32px;">
+        <div class="eyebrow">Bâti au-dessus de Vespera</div>
+        <h2 class="title" style="font-size:2.6rem;">Le Foyer de l'Astre</h2>
+      </div>
+
+      <p class="lore">Quelques jours après son arrivée, Asuna gravit seule la falaise dominant la vallée. Les habitants la regardèrent disparaître dans la neige, persuadés qu'ils ne la reverraient jamais. Pourtant, dès le lendemain, des milliers d'araignées noires recouvraient déjà la montagne. Elles surgirent des forêts, des crevasses et des falaises en une immense marée vivante avant de commencer à changer sous l'effet de la magie de leur maîtresse. Leur taille augmenta, leurs corps se redressèrent et leurs silhouettes adoptèrent progressivement une apparence humaine. Dépourvues de véritable identité, ces êtres n'étaient rien d'autre que les extensions de la volonté d'Asuna.</p>
+
+      <p class="lore">Sans échanger un seul mot, cette armée silencieuse se mit immédiatement à bâtir. Certains transportaient d'immenses blocs de pierre, d'autres sculptaient les colonnes avec une précision surnaturelle tandis que des centaines tissaient d'immenses fils de soie capables de soutenir des arches entières. Jour et nuit, sans connaître la fatigue, ils élevèrent un château colossal là où il n'existait auparavant qu'une falaise battue par les vents. Lorsque la dernière pierre fut posée, tous retrouvèrent leur forme originelle avant de disparaître dans les murs et les jardins du bâtiment qu'ils venaient d'ériger.</p>
+
+      <p class="lore">Depuis ce jour, le Foyer de l'Astre est bien plus qu'un simple château. Chaque pierre, chaque poutre et chaque mur sont imprégnés de la magie d'Asuna. Les araignées continuent d'habiter les lieux, entretenant discrètement les couloirs, réparant les moindres fissures avant qu'elles n'apparaissent et veillant sans relâche sur tous les habitants. Beaucoup pensent que le château est vivant, qu'il ressent les émotions de sa fondatrice et qu'il se défendra lui-même si ceux qu'il abrite venaient à être menacés.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <p class="lore">Le Foyer accueille principalement des orphelins, mais ses portes restent ouvertes à toute personne cherchant une seconde chance. Aventuriers blessés, voyageurs perdus, mages en quête de savoir ou simples âmes sans foyer y trouvent un toit, un repas chaud et une famille. Les enfants qui y grandissent n'appellent jamais Asuna par son nom. Pour eux, elle est simplement <strong>Mère</strong>. Derrière son apparence froide se cache une femme qui connaît chacun de leurs prénoms, leurs histoires, leurs peurs et leurs rêves. Elle veille personnellement à ce que personne ne manque de nourriture, d'éducation ou d'affection.</p>
+
+      <p class="lore">Cependant, Asuna refuse que ses enfants grandissent dans l'illusion d'un monde sans danger. Elle sait que la paix est fragile et que chacun devra un jour défendre sa propre vie ou celle des autres. Tous reçoivent donc une éducation complète, mêlant histoire, sciences, magie, stratégie, survie et arts du combat. Elle n'enseigne pas une discipline unique. Chaque enfant est encouragé à développer son propre style et à découvrir l'arme qui lui correspond le mieux. Pour Asuna, un véritable combattant ne copie personne ; il forge sa propre voie.</p>
+
+      <p class="lore italic">Elle les appelle ses <strong>Ombres</strong>. À ses yeux, une Ombre n'est pas un assassin, mais un protecteur. Une Ombre agit sans rechercher la gloire, intervient lorsque personne d'autre ne le peut et protège les plus faibles avant de disparaître sans attendre la moindre récompense. Plus qu'un titre, il s'agit d'une philosophie qui accompagne chacun de ses enfants toute leur vie.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === LIEU : ASTREVIA === -->
+    <section class="panel" id="lieu-astrevia">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner">
+        <img src="astrevia-banner.jpeg" alt="Astrevia, cité impériale grandiose aux colonnades blanches, fontaines et places monumentales, symbole de sa richesse économique et intellectuelle">
+        <div class="lieu-banner-text">
+          <div class="eyebrow">Capitale du pays de Noctis</div>
+          <h2 class="title">Astrevia</h2>
+        </div>
+      </div>
+
+      <p class="lore">Au cœur du continent d'Elyndor se dresse Astrevia, capitale d'un empire dont la puissance rayonne bien au-delà de ses immenses murailles. Depuis des siècles, la cité est le point de rencontre de quatre grands peuples : les Humains, les Sorcières, les Loups-Garous et les Vampires. Chacun possède ses quartiers, ses traditions et ses représentants, mais tous vivent sous l'autorité d'un même Empire, dont la stabilité repose sur un équilibre aussi fragile que complexe.</p>
+
+      <p class="lore">Vue de l'extérieur, Astrevia est une cité grandiose. Ses académies de magie attirent les plus brillants érudits, ses marchés regorgent de richesses venues des quatre coins du continent et ses immenses palais témoignent de siècles de prospérité. Pourtant, derrière cette façade éclatante, le pouvoir se joue dans l'ombre. Les grandes familles nobles se disputent l'influence, les alliances se concluent autant par intérêt que par conviction et les traditions occupent une place centrale dans les décisions de l'Empire.</p>
+
+      <p class="lore">Parmi les anciennes familles dirigeantes, beaucoup restent attachées à des valeurs qui ont traversé les siècles. Les mariages servent avant tout les intérêts politiques, les héritages sont soigneusement contrôlés et une femme occupant seule une position de pouvoir demeure, pour certains, une remise en question de l'ordre établi. Si les mentalités ont évolué au sein du peuple, les plus hautes sphères de l'Empire restent marquées par ce conservatisme.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">L'ombre d'Asuna Ténébris</div>
+
+      <p class="lore">C'est dans ce contexte qu'Asuna Ténébris s'est forgé une réputation. Par son intelligence, sa maîtrise exceptionnelle de la magie et ses nombreuses victoires, elle est devenue l'une des figures les plus respectées d'Astrevia. Là où beaucoup voyaient une femme destinée à servir une grande famille, elle s'imposa par ses propres mérites. Soldats, citoyens et jeunes recrues admiraient sa détermination, tandis que son nom devenait peu à peu un symbole d'excellence et de force.</p>
+
+      <p class="lore">Mais cette popularité ne faisait pas l'unanimité. Une partie de la haute hiérarchie voyait en Asuna une figure qu'il fallait contrôler. Certains souhaitaient la voir contracter un mariage politique afin de renforcer l'influence de l'Empire, d'autres désiraient faire d'elle le visage d'Astrevia, une héroïne incarnant les valeurs impériales et servant les intérêts des plus puissants. Asuna refusa systématiquement que sa vie ou sa puissance soient utilisées à des fins politiques. Elle considérait que protéger les autres devait être un choix, jamais une obligation imposée par ceux qui gouvernent.</p>
+
+      <p class="lore">Les désaccords finirent par devenir des complots. Derrière les portes closes des palais, les opposants d'Asuna gagnèrent progressivement en influence tandis que les pressions se faisaient de plus en plus fortes. Puis, un jour... Asuna disparut. Sans avertissement. Sans laisser de trace.</p>
+
+      <p class="lore">Les années passèrent, mais son absence ne fut jamais réellement acceptée. Officiellement, son nom appartient désormais aux livres d'histoire. Officieusement, certains membres de l'Empire continuent de penser que sa place est toujours à Astrevia. Ils ne la considèrent pas comme une simple femme ayant choisi une autre vie, mais comme une figure essentielle de l'Empire, dont la puissance et l'influence devraient servir la cité plutôt qu'être perdues au cœur d'un royaume lointain.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <p class="lore italic">Pendant ce temps, bien loin au nord, personne ne connaît cette histoire. À Vespera, les habitants ignorent tout des origines d'Asuna. Pour eux, elle est simplement la mystérieuse fondatrice du Foyer de l'Astre, une femme arrivée un hiver sans passé ni explication, qui consacra sa vie à offrir un refuge à ceux qui n'en avaient plus. Mais à Astrevia, certains n'ont jamais cessé de la chercher... et le jour où ils découvriront enfin où elle se cache, ils seront bien décidés à ramener chez eux celle qu'ils considèrent encore comme l'une des plus importantes figures de l'Empire.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
     </section>
 
     <!-- === FIGURES (personnages importants) === -->
@@ -925,14 +1068,23 @@
 <script>
   const buttons = document.querySelectorAll('.nav-btn');
   const panels = document.querySelectorAll('.panel');
+
+  function showPanel(id, navId){
+    panels.forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+    buttons.forEach(b => b.classList.remove('active'));
+    const navBtn = document.querySelector(`.nav-btn[data-panel="${navId || id}"]`);
+    if(navBtn) navBtn.classList.add('active');
+    document.querySelector('main').scrollTo(0,0);
+  }
+
   buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.panel).classList.add('active');
-      document.querySelector('main').scrollTo(0,0);
-    });
+    btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+  });
+
+  document.querySelectorAll('[data-goto]').forEach(el => {
+    el.addEventListener('click', () => showPanel(el.dataset.goto, 'territoires'));
   });
 </script>
 
