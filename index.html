@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Foyer de l'Astre — Elyndor</title>
-<link rel="icon" type="image/png" href="bat.png">
+<title>NOX SEPULCHRA — Elyndor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
@@ -438,6 +437,76 @@
   .rule svg{width:16px; height:16px; margin-top:4px; flex-shrink:0; color:var(--gold);}
   .rule p{ font-size:.92rem; color:var(--ash); line-height:1.6;}
 
+  /* ---- Carte interactive ---- */
+  .map-explorer{
+    display:grid; grid-template-columns:260px 1fr;
+    border:1px solid var(--card-line); height:640px; overflow:hidden;
+  }
+  .map-sidebar{
+    background:var(--void-2); border-right:1px solid var(--card-line);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .map-search-input{
+    margin:14px; padding:10px 12px;
+    background:var(--card); border:1px solid var(--card-line); color:var(--parchment);
+    font-family:'EB Garamond', serif; font-size:.85rem;
+  }
+  .map-search-input::placeholder{ color:var(--ash); }
+  .map-search-input:focus{ outline:none; border-color:var(--gold-dim); }
+  .map-city-list{ flex:1; overflow-y:auto; padding:0 8px 14px; }
+  .map-city-list::-webkit-scrollbar{ width:7px; }
+  .map-city-list::-webkit-scrollbar-thumb{ background:var(--card-line); }
+  .map-city-group-title{
+    font-family:'Cinzel', serif; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold); padding:14px 8px 5px;
+  }
+  .map-city-item{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:6px 8px; font-size:.78rem; color:var(--ash); cursor:pointer; border-radius:2px;
+  }
+  .map-city-item:hover{ background:rgba(163,19,47,.14); color:var(--parchment); }
+  .map-city-item .cap{ color:var(--gold); font-size:.6rem; font-family:'Cinzel', serif; flex-shrink:0; }
+  .map-city-empty{ padding:16px 10px; font-size:.8rem; color:var(--ash); font-style:italic; }
+
+  .map-viewport{
+    position:relative; overflow:hidden; background:#050308; cursor:grab;
+  }
+  .map-viewport.dragging{ cursor:grabbing; }
+  .map-zoom-controls{
+    position:absolute; top:14px; right:14px; z-index:5; display:flex; flex-direction:column; gap:6px;
+  }
+  .map-zoom-controls button{
+    width:32px; height:32px; background:var(--card); border:1px solid var(--card-line); color:var(--parchment);
+    font-family:'Cinzel', serif; font-size:1rem; cursor:pointer; line-height:1;
+  }
+  .map-zoom-controls button:hover{ border-color:var(--gold-dim); color:var(--gold); }
+  .map-hint{
+    position:absolute; bottom:12px; left:14px; z-index:5;
+    font-family:'Cinzel', serif; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ash); background:rgba(10,7,16,.7); padding:6px 10px; border:1px solid var(--card-line);
+  }
+  .map-canvas{ position:absolute; top:0; left:0; transform-origin:0 0; }
+  .map-canvas img{ display:block; user-select:none; -webkit-user-drag:none; pointer-events:none; }
+
+  .city-label{
+    position:absolute; transform:translate(-50%,-100%);
+    display:none; flex-direction:column; align-items:center;
+    pointer-events:none; white-space:nowrap;
+  }
+  .city-label.show{ display:flex; }
+  .city-label .dot{
+    width:5px; height:5px; border-radius:50%; background:var(--gold);
+    margin-bottom:3px; box-shadow:0 0 4px var(--gold);
+  }
+  .city-label.capital .dot{
+    width:8px; height:8px; background:var(--wine-bright); box-shadow:0 0 7px var(--wine-bright);
+  }
+  .city-label span{
+    font-family:'Cinzel', serif; font-size:10px; letter-spacing:.02em; color:var(--parchment);
+    text-shadow:0 0 5px #000, 0 0 3px #000, 0 1px 2px #000;
+  }
+  .city-label.capital span{ font-size:11.5px; color:#fff; }
+
   @media (max-width: 820px){
     .app{grid-template-columns:1fr;}
     .sidebar{
@@ -462,6 +531,8 @@
     .map-text{max-width:100%; padding:24px;}
     .lieu-banner{height:260px;}
     .lieu-banner-text{left:20px; right:20px; bottom:16px;}
+    .map-explorer{ grid-template-columns:1fr; grid-template-rows:180px 1fr; height:560px; }
+    .map-sidebar{ border-right:none; border-bottom:1px solid var(--card-line); }
   }
 </style>
 </head>
@@ -530,9 +601,9 @@
         <p class="hero-caption">Le Foyer de l'Astre, dominant la vallée de Vespera</p>
 
         <div class="stat-row">
-          <div class="stat"><span class="num">03</span><span class="lbl">Territoires</span></div>
+          <div class="stat"><span class="num">04</span><span class="lbl">Territoires</span></div>
           <div class="stat"><span class="num">12+</span><span class="lbl">Rôles ouverts</span></div>
-          <div class="stat"><span class="num">01</span><span class="lbl">Figure confirmée</span></div>
+          <div class="stat"><span class="num">02</span><span class="lbl">Figures confirmées</span></div>
           <div class="stat"><span class="num">∞</span><span class="lbl">Nuits à venir</span></div>
         </div>
       </div>
@@ -582,165 +653,6 @@
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Vespera, au nord, vit à l'ombre protectrice du Foyer de l'Astre et de ses Ombres.</p></div>
         <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/></svg><p>Astrevia, la capitale impériale et de Noctis, n'a jamais renoncé à retrouver Asuna Ténébris.</p></div>
       </div>
-    </section>
-    <!-- === TERRITOIRES (villes + rôles) === -->
-    <section class="panel" id="territoires">
-      <div class="eyebrow">Géographie du sang</div>
-      <h2 class="title">Les Territoires</h2>
-      <p class="subtitle">Vespera, le Foyer de l'Astre bâti au-dessus d'elle, et Astrevia, la capitale impériale et de Noctis — les rôles précis de chaque territoire restent à définir.</p>
-
-      <div class="grid">
-
-        <div class="map-card">
-          <img class="map-illustration" src="Elyndor.png" alt="Carte du continent avec Vespera et Astrevia entourées en rouge" style="object-fit:cover; object-position:50% 42%;">
-
-          <div class="map-text">
-            <div class="eyebrow">Cartographie</div>
-            <h3>Ravenhold</h3>
-            <p>Vespera se dresse au nord, dans le froid d'Elyndor, tandis qu'Astrevia domine le cœur du continent, au sud — les deux cités clés de l'intrigue, repérées en rouge sur la carte.</p>
-            <div class="map-legend">
-              <div class="map-legend-item"><span class="dot" style="background:#c8ae1c;"></span><span>Vespera <span class="sub">Au nord — Foyer de l'Astre</span></span></div>
-              <div class="map-legend-item"><span class="dot" style="background:#c81c3f;"></span><span>Astrevia <span class="sub">Au sud — capitale de l'Empire</span></span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <span class="card-tag">Village d'Elyndor</span>
-          <h3>Vespera</h3>
-          <div class="meta">Ambiance : hiver éternel, refuge &amp; famille</div>
-          <p>Cité de pierre noire réchauffée par ses cheminées, nichée au creux d'une vallée enneigée. Ses rues pavées restent animées en toute saison — marchés, auberges et voyageurs de passage — sous le regard silencieux du Foyer de l'Astre, dressé sur la falaise qui domine la ville.</p>
-          <div class="roles">
-            <div class="role-row"><span class="rname">Habitant de Vespera</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Marchand / Aubergiste</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Voyageur de passage</span><span class="rslots">à définir</span></div>
-          </div>
-          <button class="card-link" data-goto="lieu-vespera" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-        </div>
-
-        <div class="card">
-          <span class="card-tag">Bâti au-dessus de Vespera</span>
-          <h3>Le Foyer de l'Astre</h3>
-          <div class="meta">Ambiance : famille, entraînement, protection</div>
-          <p>Forteresse aux vitraux écarlates dressée au sommet de la falaise dominant Vespera, bâtie en une nuit par les araignées d'Asuna Ténébris. Refuge des orphelins et des âmes sans toit, le Foyer forme ses enfants — les Ombres — à l'histoire, à la magie et au combat, jusqu'au Sacre qui scelle leur entrée dans l'âge adulte.</p>
-          <div class="roles">
-            <div class="role-row"><span class="rname">Ombre du Foyer</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Enfant du Foyer</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Aîné(e) formateur/trice</span><span class="rslots">à définir</span></div>
-          </div>
-          <button class="card-link" data-goto="lieu-foyer" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-        </div>
-
-        <div class="card">
-          <span class="card-tag">Capitale du pays de Noctis</span>
-          <h3>Astrevia</h3>
-          <div class="meta">Ambiance : politique impériale, quatre peuples</div>
-          <p>Cité grandiose au cœur du continent, où Humains, Sorcières, Loups-Garous et Vampires coexistent sous une même autorité fragile. Académies de magie, marchés opulents et complots de palais s'y côtoient.</p>
-          <div class="roles">
-            <div class="role-row"><span class="rname">Noble impérial</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Agent en quête d'Asuna</span><span class="rslots">à définir</span></div>
-            <div class="role-row"><span class="rname">Érudit d'académie</span><span class="rslots">à définir</span></div>
-          </div>
-          <button class="card-link" data-goto="lieu-astrevia" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- === LIEU : VESPERA === -->
-    <section class="panel" id="lieu-vespera">
-      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
-
-      <div class="lieu-banner">
-        <img src="vespera.jpg" alt="Astrevia, cité impériale grandiose aux colonnades blanches, fontaines et places monumentales, symbole de sa richesse économique et intellectuelle">
-      </div>
-      <div style="margin:-14px 0 32px;">
-        <div class="eyebrow">Royaume d'Elyndor — Nord de Ravenhold</div>
-        <h2 class="title" style="font-size:2.6rem;">Vespera</h2>
-      </div>
-
-      <p class="lore">Vespera est un village reculé, niché au creux d'une vallée enneigée au pied des montagnes du nord d'Elyndor. Bâti en pierre noire et réchauffé par d'innombrables cheminées, il vit toute l'année sous un hiver qui ne semble jamais vouloir céder sa place. Malgré ce climat rude, les rues pavées restent animées quelle que soit la saison : les marchés accueillent aussi bien des marchands venus des royaumes voisins que des aventuriers, des mages ou des voyageurs cherchant un endroit où reprendre des forces avant de poursuivre leur route.</p>
-
-      <p class="lore">Loin des grandes capitales et des guerres qui agitent le reste du continent, Vespera dégage une atmosphère étonnamment chaleureuse pour un lieu si isolé. Les habitants se connaissent tous, les enfants jouent dans les rues enneigées, et les portes des auberges restent ouvertes jusque tard dans la nuit. Depuis presque n'importe quel endroit du village, il suffit de lever les yeux pour apercevoir la silhouette du Foyer de l'Astre, dressé au sommet de la falaise qui domine toute la vallée — un repère si familier qu'il est devenu, avec le temps, le véritable symbole de Vespera.</p>
-
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
-
-      <div class="eyebrow" style="margin-top:0;">Administration</div>
-      <p class="lore">Vespera est administré par un <strong>Gouverneur</strong>, chargé de veiller à l'ordre et à la prospérité du village — gestion des marchés, arbitrage des différends, entretien des routes en hiver — tout en composant en permanence avec la présence discrète mais omniprésente du Foyer de l'Astre qui surplombe la cité. Le poste, actuellement vacant, reste l'un des rôles les plus influents que l'on puisse tenir à Vespera <em>(voir la fiche disponible dans La Cour)</em>.</p>
-
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
-
-      <div class="eyebrow" style="margin-top:0;">Vivre à Vespera</div>
-      <p class="lore">La majorité des habitants sont des Humains, mais Vespera reste ouvert à tous les peuples d'Elyndor — le froid ne fait pas de distinction. Marchands, aubergistes, chasseurs et artisans y tiennent boutique, tandis que les voyageurs de passage y trouvent toujours une auberge où poser leurs affaires avant de reprendre la route. Beaucoup d'habitants entretiennent une relation particulière avec le Foyer : certains y ont grandi, d'autres lui doivent tout simplement leur vie, épargnés par les monstres qui rôdaient jadis dans la vallée avant l'arrivée d'Asuna.</p>
-
-      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
-    </section>
-
-    <!-- === LIEU : LE FOYER DE L'ASTRE === -->
-    <section class="panel" id="lieu-foyer">
-      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
-
-      <div class="lieu-banner">
-        <img src="foyer.jpg" alt="Astrevia, cité impériale grandiose aux colonnades blanches, fontaines et places monumentales, symbole de sa richesse économique et intellectuelle">
-
-      </div>
-      <div style="margin:-14px 0 32px;">
-        <div class="eyebrow">Bâti au-dessus de Vespera</div>
-        <h2 class="title" style="font-size:2.6rem;">Le Foyer de l'Astre</h2>
-      </div>
-
-      <p class="lore">Quelques jours après son arrivée, Asuna gravit seule la falaise dominant la vallée. Les habitants la regardèrent disparaître dans la neige, persuadés qu'ils ne la reverraient jamais. Pourtant, dès le lendemain, des milliers d'araignées noires recouvraient déjà la montagne. Elles surgirent des forêts, des crevasses et des falaises en une immense marée vivante avant de commencer à changer sous l'effet de la magie de leur maîtresse. Leur taille augmenta, leurs corps se redressèrent et leurs silhouettes adoptèrent progressivement une apparence humaine. Dépourvues de véritable identité, ces êtres n'étaient rien d'autre que les extensions de la volonté d'Asuna.</p>
-
-      <p class="lore">Sans échanger un seul mot, cette armée silencieuse se mit immédiatement à bâtir. Certains transportaient d'immenses blocs de pierre, d'autres sculptaient les colonnes avec une précision surnaturelle tandis que des centaines tissaient d'immenses fils de soie capables de soutenir des arches entières. Jour et nuit, sans connaître la fatigue, ils élevèrent un château colossal là où il n'existait auparavant qu'une falaise battue par les vents. Lorsque la dernière pierre fut posée, tous retrouvèrent leur forme originelle avant de disparaître dans les murs et les jardins du bâtiment qu'ils venaient d'ériger.</p>
-
-      <p class="lore">Depuis ce jour, le Foyer de l'Astre est bien plus qu'un simple château. Chaque pierre, chaque poutre et chaque mur sont imprégnés de la magie d'Asuna. Les araignées continuent d'habiter les lieux, entretenant discrètement les couloirs, réparant les moindres fissures avant qu'elles n'apparaissent et veillant sans relâche sur tous les habitants. Beaucoup pensent que le château est vivant, qu'il ressent les émotions de sa fondatrice et qu'il se défendra lui-même si ceux qu'il abrite venaient à être menacés.</p>
-
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
-
-      <p class="lore">Le Foyer accueille principalement des orphelins, mais ses portes restent ouvertes à toute personne cherchant une seconde chance. Aventuriers blessés, voyageurs perdus, mages en quête de savoir ou simples âmes sans foyer y trouvent un toit, un repas chaud et une famille. Les enfants qui y grandissent n'appellent jamais Asuna par son nom. Pour eux, elle est simplement <strong>Mère</strong>. Derrière son apparence froide se cache une femme qui connaît chacun de leurs prénoms, leurs histoires, leurs peurs et leurs rêves. Elle veille personnellement à ce que personne ne manque de nourriture, d'éducation ou d'affection.</p>
-
-      <p class="lore">Cependant, Asuna refuse que ses enfants grandissent dans l'illusion d'un monde sans danger. Elle sait que la paix est fragile et que chacun devra un jour défendre sa propre vie ou celle des autres. Tous reçoivent donc une éducation complète, mêlant histoire, sciences, magie, stratégie, survie et arts du combat. Elle n'enseigne pas une discipline unique. Chaque enfant est encouragé à développer son propre style et à découvrir l'arme qui lui correspond le mieux. Pour Asuna, un véritable combattant ne copie personne ; il forge sa propre voie.</p>
-
-      <p class="lore italic">Elle les appelle ses <strong>Ombres</strong>. À ses yeux, une Ombre n'est pas un assassin, mais un protecteur. Une Ombre agit sans rechercher la gloire, intervient lorsque personne d'autre ne le peut et protège les plus faibles avant de disparaître sans attendre la moindre récompense. Plus qu'un titre, il s'agit d'une philosophie qui accompagne chacun de ses enfants toute leur vie.</p>
-
-      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
-    </section>
-
-    <!-- === LIEU : ASTREVIA === -->
-    <section class="panel" id="lieu-astrevia">
-      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
-
-      <div class="lieu-banner">
-        <img src="astrevia-banner.jpeg" alt="Astrevia, cité impériale grandiose aux colonnades blanches, fontaines et places monumentales, symbole de sa richesse économique et intellectuelle">
-        <div class="lieu-banner-text">
-          <div class="eyebrow">Capitale du pays de Noctis</div>
-          <h2 class="title">Astrevia</h2>
-        </div>
-      </div>
-
-      <p class="lore">Au cœur du continent d'Elyndor se dresse Astrevia, capitale d'un empire dont la puissance rayonne bien au-delà de ses immenses murailles. Depuis des siècles, la cité est le point de rencontre de quatre grands peuples : les Humains, les Sorcières, les Loups-Garous et les Vampires. Chacun possède ses quartiers, ses traditions et ses représentants, mais tous vivent sous l'autorité d'un même Empire, dont la stabilité repose sur un équilibre aussi fragile que complexe.</p>
-
-      <p class="lore">Vue de l'extérieur, Astrevia est une cité grandiose. Ses académies de magie attirent les plus brillants érudits, ses marchés regorgent de richesses venues des quatre coins du continent et ses immenses palais témoignent de siècles de prospérité. Pourtant, derrière cette façade éclatante, le pouvoir se joue dans l'ombre. Les grandes familles nobles se disputent l'influence, les alliances se concluent autant par intérêt que par conviction et les traditions occupent une place centrale dans les décisions de l'Empire.</p>
-
-      <p class="lore">Parmi les anciennes familles dirigeantes, beaucoup restent attachées à des valeurs qui ont traversé les siècles. Les mariages servent avant tout les intérêts politiques, les héritages sont soigneusement contrôlés et une femme occupant seule une position de pouvoir demeure, pour certains, une remise en question de l'ordre établi. Si les mentalités ont évolué au sein du peuple, les plus hautes sphères de l'Empire restent marquées par ce conservatisme.</p>
-
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
-
-      <div class="eyebrow" style="margin-top:0;">L'ombre d'Asuna Ténébris</div>
-
-      <p class="lore">C'est dans ce contexte qu'Asuna Ténébris s'est forgé une réputation. Par son intelligence, sa maîtrise exceptionnelle de la magie et ses nombreuses victoires, elle est devenue l'une des figures les plus respectées d'Astrevia. Là où beaucoup voyaient une femme destinée à servir une grande famille, elle s'imposa par ses propres mérites. Soldats, citoyens et jeunes recrues admiraient sa détermination, tandis que son nom devenait peu à peu un symbole d'excellence et de force.</p>
-
-      <p class="lore">Mais cette popularité ne faisait pas l'unanimité. Une partie de la haute hiérarchie voyait en Asuna une figure qu'il fallait contrôler. Certains souhaitaient la voir contracter un mariage politique afin de renforcer l'influence de l'Empire, d'autres désiraient faire d'elle le visage d'Astrevia, une héroïne incarnant les valeurs impériales et servant les intérêts des plus puissants. Asuna refusa systématiquement que sa vie ou sa puissance soient utilisées à des fins politiques. Elle considérait que protéger les autres devait être un choix, jamais une obligation imposée par ceux qui gouvernent.</p>
-
-      <p class="lore">Les désaccords finirent par devenir des complots. Derrière les portes closes des palais, les opposants d'Asuna gagnèrent progressivement en influence tandis que les pressions se faisaient de plus en plus fortes. Puis, un jour... Asuna disparut. Sans avertissement. Sans laisser de trace.</p>
-
-      <p class="lore">Les années passèrent, mais son absence ne fut jamais réellement acceptée. Officiellement, son nom appartient désormais aux livres d'histoire. Officieusement, certains membres de l'Empire continuent de penser que sa place est toujours à Astrevia. Ils ne la considèrent pas comme une simple femme ayant choisi une autre vie, mais comme une figure essentielle de l'Empire, dont la puissance et l'influence devraient servir la cité plutôt qu'être perdues au cœur d'un royaume lointain.</p>
-
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
-
-      <p class="lore italic">Pendant ce temps, bien loin au nord, personne ne connaît cette histoire. À Vespera, les habitants ignorent tout des origines d'Asuna. Pour eux, elle est simplement la mystérieuse fondatrice du Foyer de l'Astre, une femme arrivée un hiver sans passé ni explication, qui consacra sa vie à offrir un refuge à ceux qui n'en avaient plus. Mais à Astrevia, certains n'ont jamais cessé de la chercher... et le jour où ils découvriront enfin où elle se cache, ils seront bien décidés à ramener chez eux celle qu'ils considèrent encore comme l'une des plus importantes figures de l'Empire.</p>
-
-      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
     </section>
 
     <!-- === LES PEUPLES (races) === -->
@@ -963,12 +875,241 @@
       </div>
     </section>
 
+    <!-- === TERRITOIRES (villes + rôles) === -->
+    <section class="panel" id="territoires">
+      <div class="eyebrow">Géographie du sang</div>
+      <h2 class="title">Les Territoires</h2>
+      <p class="subtitle">Vespera, le Foyer de l'Astre bâti au-dessus d'elle, Astrevia (capitale impériale et de Noctis) et Seacumère (capitale d'Elyndor) — les rôles précis de chaque territoire restent à définir.</p>
 
-    <!-- === FIGURES (personnages importants) === -->
+      <div class="grid">
+
+        <div class="map-card">
+          <img class="map-illustration" src="Elyndor.png" alt="Carte du continent avec Vespera et Astrevia entourées en rouge" style="object-fit:cover; object-position:50% 42%;">
+
+          <div class="map-text">
+            <div class="eyebrow">Cartographie</div>
+            <h3>Ravenhold</h3>
+            <p>Vespera se dresse au nord, dans le froid d'Elyndor, tandis qu'Astrevia domine le cœur du continent, au sud — les deux cités clés de l'intrigue, repérées en rouge sur la carte.</p>
+            <div class="map-legend">
+              <div class="map-legend-item"><span class="dot" style="background:#c8ae1c;"></span><span>Vespera <span class="sub">Au nord — Foyer de l'Astre</span></span></div>
+              <div class="map-legend-item"><span class="dot" style="background:#c81c3f;"></span><span>Astrevia <span class="sub">Au sud — capitale de l'Empire</span></span></div>
+            </div>
+            <button class="card-link" data-goto="carte-interactive" style="margin-top:18px;">Explorer la carte interactive <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <span class="card-tag">Village d'Elyndor</span>
+          <h3>Vespera</h3>
+          <div class="meta">Ambiance : hiver éternel, refuge &amp; famille</div>
+          <p>Cité de pierre noire réchauffée par ses cheminées, nichée au creux d'une vallée enneigée. Ses rues pavées restent animées en toute saison — marchés, auberges et voyageurs de passage — sous le regard silencieux du Foyer de l'Astre, dressé sur la falaise qui domine la ville.</p>
+          <div class="roles">
+            <div class="role-row"><span class="rname">Habitant de Vespera</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Marchand / Aubergiste</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Voyageur de passage</span><span class="rslots">à définir</span></div>
+          </div>
+          <button class="card-link" data-goto="lieu-vespera" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+        <div class="card">
+          <span class="card-tag">Bâti au-dessus de Vespera</span>
+          <h3>Le Foyer de l'Astre</h3>
+          <div class="meta">Ambiance : famille, entraînement, protection</div>
+          <p>Forteresse aux vitraux écarlates dressée au sommet de la falaise dominant Vespera, bâtie en une nuit par les araignées d'Asuna Ténébris. Refuge des orphelins et des âmes sans toit, le Foyer forme ses enfants — les Ombres — à l'histoire, à la magie et au combat, jusqu'au Sacre qui scelle leur entrée dans l'âge adulte.</p>
+          <div class="roles">
+            <div class="role-row"><span class="rname">Ombre du Foyer</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Enfant du Foyer</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Aîné(e) formateur/trice</span><span class="rslots">à définir</span></div>
+          </div>
+          <button class="card-link" data-goto="lieu-foyer" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+        <div class="card">
+          <span class="card-tag">Capitale du pays de Noctis</span>
+          <h3>Astrevia</h3>
+          <div class="meta">Ambiance : politique impériale, quatre peuples</div>
+          <p>Cité grandiose au cœur du continent, où Humains, Sorcières, Loups-Garous et Vampires coexistent sous une même autorité fragile. Académies de magie, marchés opulents et complots de palais s'y côtoient.</p>
+          <div class="roles">
+            <div class="role-row"><span class="rname">Noble impérial</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Agent en quête d'Asuna</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Érudit d'académie</span><span class="rslots">à définir</span></div>
+          </div>
+          <button class="card-link" data-goto="lieu-astrevia" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+        <div class="card">
+          <span class="card-tag">Capitale d'Elyndor</span>
+          <h3>Seacumère</h3>
+          <div class="meta">Ambiance : démocratie, savoir, cité-lac</div>
+          <p>Bâtie sur les rives d'un immense lac qui rejoint la mer du côté de Noctis, Seacumère ne connaît aucune couronne. La cité est gouvernée par un Conseil, un représentant pour chacun des peuples qui l'habitent, unis autour de deux piliers : la démocratie et la connaissance.</p>
+          <div class="roles">
+            <div class="role-row"><span class="rname">Conseiller(ère) — Humain</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Conseiller(ère) — Fée</span><span class="rslots">à définir</span></div>
+            <div class="role-row"><span class="rname">Conseiller(ère) — Elfe</span><span class="rslots">à définir</span></div>
+          </div>
+          <button class="card-link" data-goto="lieu-seacumere" style="margin-top:16px;">En savoir plus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- === LIEU : VESPERA === -->
+    <section class="panel" id="lieu-vespera">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner">
+        <img src="vespera.jpg" alt="Vespera, village de pierre noire niché dans une vallée enneigée au pied des montagnes du nord d'Elyndor">
+        <div class="lieu-banner-text">
+          <div class="eyebrow">Royaume d'Elyndor — Nord de Ravenhold</div>
+          <h2 class="title">Vespera</h2>
+        </div>
+      </div>
+
+      <p class="lore">Vespera est un village reculé, niché au creux d'une vallée enneigée au pied des montagnes du nord d'Elyndor. Bâti en pierre noire et réchauffé par d'innombrables cheminées, il vit toute l'année sous un hiver qui ne semble jamais vouloir céder sa place. Malgré ce climat rude, les rues pavées restent animées quelle que soit la saison : les marchés accueillent aussi bien des marchands venus des royaumes voisins que des aventuriers, des mages ou des voyageurs cherchant un endroit où reprendre des forces avant de poursuivre leur route.</p>
+
+      <p class="lore">Loin des grandes capitales et des guerres qui agitent le reste du continent, Vespera dégage une atmosphère étonnamment chaleureuse pour un lieu si isolé. Les habitants se connaissent tous, les enfants jouent dans les rues enneigées, et les portes des auberges restent ouvertes jusque tard dans la nuit. Depuis presque n'importe quel endroit du village, il suffit de lever les yeux pour apercevoir la silhouette du Foyer de l'Astre, dressé au sommet de la falaise qui domine toute la vallée — un repère si familier qu'il est devenu, avec le temps, le véritable symbole de Vespera.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Administration</div>
+      <p class="lore">Vespera est administré par un <strong>Gouverneur</strong>, chargé de veiller à l'ordre et à la prospérité du village — gestion des marchés, arbitrage des différends, entretien des routes en hiver — tout en composant en permanence avec la présence discrète mais omniprésente du Foyer de l'Astre qui surplombe la cité. Le poste, actuellement vacant, reste l'un des rôles les plus influents que l'on puisse tenir à Vespera <em>(voir la fiche disponible dans La Cour)</em>.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Vivre à Vespera</div>
+      <p class="lore">La majorité des habitants sont des Humains, mais Vespera reste ouvert à tous les peuples d'Elyndor — le froid ne fait pas de distinction. Marchands, aubergistes, chasseurs et artisans y tiennent boutique, tandis que les voyageurs de passage y trouvent toujours une auberge où poser leurs affaires avant de reprendre la route. Beaucoup d'habitants entretiennent une relation particulière avec le Foyer : certains y ont grandi, d'autres lui doivent tout simplement leur vie, épargnés par les monstres qui rôdaient jadis dans la vallée avant l'arrivée d'Asuna.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === LIEU : LE FOYER DE L'ASTRE === -->
+    <section class="panel" id="lieu-foyer">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner">
+        <img src="foyer.jpg" alt="Le Foyer de l'Astre, forteresse aux vitraux écarlates dressée au sommet de la falaise dominant Vespera">
+        <div class="lieu-banner-text">
+          <div class="eyebrow">Bâti au-dessus de Vespera</div>
+          <h2 class="title">Le Foyer de l'Astre</h2>
+        </div>
+      </div>
+
+      <p class="lore">Quelques jours après son arrivée, Asuna gravit seule la falaise dominant la vallée. Les habitants la regardèrent disparaître dans la neige, persuadés qu'ils ne la reverraient jamais. Pourtant, dès le lendemain, des milliers d'araignées noires recouvraient déjà la montagne. Elles surgirent des forêts, des crevasses et des falaises en une immense marée vivante avant de commencer à changer sous l'effet de la magie de leur maîtresse. Leur taille augmenta, leurs corps se redressèrent et leurs silhouettes adoptèrent progressivement une apparence humaine. Dépourvues de véritable identité, ces êtres n'étaient rien d'autre que les extensions de la volonté d'Asuna.</p>
+
+      <p class="lore">Sans échanger un seul mot, cette armée silencieuse se mit immédiatement à bâtir. Certains transportaient d'immenses blocs de pierre, d'autres sculptaient les colonnes avec une précision surnaturelle tandis que des centaines tissaient d'immenses fils de soie capables de soutenir des arches entières. Jour et nuit, sans connaître la fatigue, ils élevèrent un château colossal là où il n'existait auparavant qu'une falaise battue par les vents. Lorsque la dernière pierre fut posée, tous retrouvèrent leur forme originelle avant de disparaître dans les murs et les jardins du bâtiment qu'ils venaient d'ériger.</p>
+
+      <p class="lore">Depuis ce jour, le Foyer de l'Astre est bien plus qu'un simple château. Chaque pierre, chaque poutre et chaque mur sont imprégnés de la magie d'Asuna. Les araignées continuent d'habiter les lieux, entretenant discrètement les couloirs, réparant les moindres fissures avant qu'elles n'apparaissent et veillant sans relâche sur tous les habitants. Beaucoup pensent que le château est vivant, qu'il ressent les émotions de sa fondatrice et qu'il se défendra lui-même si ceux qu'il abrite venaient à être menacés.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <p class="lore">Le Foyer accueille principalement des orphelins, mais ses portes restent ouvertes à toute personne cherchant une seconde chance. Aventuriers blessés, voyageurs perdus, mages en quête de savoir ou simples âmes sans foyer y trouvent un toit, un repas chaud et une famille. Les enfants qui y grandissent n'appellent jamais Asuna par son nom. Pour eux, elle est simplement <strong>Mère</strong>. Derrière son apparence froide se cache une femme qui connaît chacun de leurs prénoms, leurs histoires, leurs peurs et leurs rêves. Elle veille personnellement à ce que personne ne manque de nourriture, d'éducation ou d'affection.</p>
+
+      <p class="lore">Cependant, Asuna refuse que ses enfants grandissent dans l'illusion d'un monde sans danger. Elle sait que la paix est fragile et que chacun devra un jour défendre sa propre vie ou celle des autres. Tous reçoivent donc une éducation complète, mêlant histoire, sciences, magie, stratégie, survie et arts du combat. Elle n'enseigne pas une discipline unique. Chaque enfant est encouragé à développer son propre style et à découvrir l'arme qui lui correspond le mieux. Pour Asuna, un véritable combattant ne copie personne ; il forge sa propre voie.</p>
+
+      <p class="lore italic">Elle les appelle ses <strong>Ombres</strong>. À ses yeux, une Ombre n'est pas un assassin, mais un protecteur. Une Ombre agit sans rechercher la gloire, intervient lorsque personne d'autre ne le peut et protège les plus faibles avant de disparaître sans attendre la moindre récompense. Plus qu'un titre, il s'agit d'une philosophie qui accompagne chacun de ses enfants toute leur vie.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === LIEU : ASTREVIA === -->
+    <section class="panel" id="lieu-astrevia">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner">
+        <img src="astrevia-banner.jpeg" alt="Astrevia, cité impériale grandiose aux colonnades blanches, fontaines et places monumentales, symbole de sa richesse économique et intellectuelle">
+        <div class="lieu-banner-text">
+          <div class="eyebrow">Capitale du pays de Noctis</div>
+          <h2 class="title">Astrevia</h2>
+        </div>
+      </div>
+
+      <p class="lore">Au cœur du continent d'Elyndor se dresse Astrevia, capitale d'un empire dont la puissance rayonne bien au-delà de ses immenses murailles. Depuis des siècles, la cité est le point de rencontre de quatre grands peuples : les Humains, les Sorcières, les Loups-Garous et les Vampires. Chacun possède ses quartiers, ses traditions et ses représentants, mais tous vivent sous l'autorité d'un même Empire, dont la stabilité repose sur un équilibre aussi fragile que complexe.</p>
+
+      <p class="lore">Vue de l'extérieur, Astrevia est une cité grandiose. Ses académies de magie attirent les plus brillants érudits, ses marchés regorgent de richesses venues des quatre coins du continent et ses immenses palais témoignent de siècles de prospérité. Pourtant, derrière cette façade éclatante, le pouvoir se joue dans l'ombre. Les grandes familles nobles se disputent l'influence, les alliances se concluent autant par intérêt que par conviction et les traditions occupent une place centrale dans les décisions de l'Empire.</p>
+
+      <p class="lore">Parmi les anciennes familles dirigeantes, beaucoup restent attachées à des valeurs qui ont traversé les siècles. Les mariages servent avant tout les intérêts politiques, les héritages sont soigneusement contrôlés et une femme occupant seule une position de pouvoir demeure, pour certains, une remise en question de l'ordre établi. Si les mentalités ont évolué au sein du peuple, les plus hautes sphères de l'Empire restent marquées par ce conservatisme.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">L'ombre d'Asuna Ténébris</div>
+
+      <p class="lore">C'est dans ce contexte qu'Asuna Ténébris s'est forgé une réputation. Par son intelligence, sa maîtrise exceptionnelle de la magie et ses nombreuses victoires, elle est devenue l'une des figures les plus respectées d'Astrevia. Là où beaucoup voyaient une femme destinée à servir une grande famille, elle s'imposa par ses propres mérites. Soldats, citoyens et jeunes recrues admiraient sa détermination, tandis que son nom devenait peu à peu un symbole d'excellence et de force.</p>
+
+      <p class="lore">Mais cette popularité ne faisait pas l'unanimité. Une partie de la haute hiérarchie voyait en Asuna une figure qu'il fallait contrôler. Certains souhaitaient la voir contracter un mariage politique afin de renforcer l'influence de l'Empire, d'autres désiraient faire d'elle le visage d'Astrevia, une héroïne incarnant les valeurs impériales et servant les intérêts des plus puissants. Asuna refusa systématiquement que sa vie ou sa puissance soient utilisées à des fins politiques. Elle considérait que protéger les autres devait être un choix, jamais une obligation imposée par ceux qui gouvernent.</p>
+
+      <p class="lore">Les désaccords finirent par devenir des complots. Derrière les portes closes des palais, les opposants d'Asuna gagnèrent progressivement en influence tandis que les pressions se faisaient de plus en plus fortes. Puis, un jour... Asuna disparut. Sans avertissement. Sans laisser de trace.</p>
+
+      <p class="lore">Les années passèrent, mais son absence ne fut jamais réellement acceptée. Officiellement, son nom appartient désormais aux livres d'histoire. Officieusement, certains membres de l'Empire continuent de penser que sa place est toujours à Astrevia. Ils ne la considèrent pas comme une simple femme ayant choisi une autre vie, mais comme une figure essentielle de l'Empire, dont la puissance et l'influence devraient servir la cité plutôt qu'être perdues au cœur d'un royaume lointain.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <p class="lore italic">Pendant ce temps, bien loin au nord, personne ne connaît cette histoire. À Vespera, les habitants ignorent tout des origines d'Asuna. Pour eux, elle est simplement la mystérieuse fondatrice du Foyer de l'Astre, une femme arrivée un hiver sans passé ni explication, qui consacra sa vie à offrir un refuge à ceux qui n'en avaient plus. Mais à Astrevia, certains n'ont jamais cessé de la chercher... et le jour où ils découvriront enfin où elle se cache, ils seront bien décidés à ramener chez eux celle qu'ils considèrent encore comme l'une des plus importantes figures de l'Empire.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === LIEU : SEACUMÈRE === -->
+    <section class="panel" id="lieu-seacumere">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="lieu-banner">
+        <img src="seacumere-banner.jpeg" alt="Seacumère, cité capitale bâtie au bord d'un vaste lac, aux dômes de cuivre et places animées">
+        <div class="lieu-banner-text">
+          <div class="eyebrow">Capitale d'Elyndor</div>
+          <h2 class="title">Seacumère</h2>
+        </div>
+      </div>
+
+      <p class="lore">Seacumère se dresse sur les rives d'un lac si vaste que certains, au loin, le prennent pour une mer. Il en est d'ailleurs presque une : ses eaux rejoignent véritablement la mer du côté de Noctis, faisant de la cité un carrefour commercial et intellectuel entre les deux pays. Ses dômes de cuivre, ses places animées de fontaines et ses larges avenues bordées de jardins lui donnent des airs de cité prospère, ouverte sur le monde plutôt que repliée derrière des murailles.</p>
+
+      <p class="lore">Contrairement à Astrevia, Seacumère ne connaît aucune couronne. Aucun roi, aucune reine, aucune lignée à défendre. La cité repose sur deux piliers seulement : la <strong>démocratie</strong> et la <strong>connaissance</strong>. Ses bibliothèques et ses académies attirent érudits et curieux de tout Elyndor, tandis que ses places publiques accueillent régulièrement débats et assemblées ouvertes à quiconque souhaite y prendre la parole.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Le Conseil de Seacumère</div>
+      <p class="lore">La cité est administrée par un <strong>Conseil</strong> composé de trois représentants — un pour chacun des peuples qui composent sa population : un Humain, une Fée et un Elfe. Aucun des trois ne détient plus de pouvoir que les autres ; les décisions se prennent à la majorité, dans le respect des deux piliers fondateurs de la cité. Ce mode de gouvernance, unique sur le continent, fait de Seacumère un modèle aussi admiré par certains que jugé fragile par d'autres, habitués aux monarchies environnantes.</p>
+
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12h16M4 12l4-4M4 12l4 4"/></svg></div>
+
+      <div class="eyebrow" style="margin-top:0;">Vivre à Seacumère</div>
+      <p class="lore">Grâce à sa position sur le lac et son accès à la mer, Seacumère vit au rythme de ses marchés portuaires et de ses échanges avec Noctis. Marchands, érudits, artisans et voyageurs de tous horizons s'y côtoient dans une relative harmonie, portée par l'idée que le savoir et la parole valent mieux que la force. C'est aussi l'un des rares endroits d'Elyndor où l'on peut débattre ouvertement des affaires de la cité, quelle que soit son origine.</p>
+
+      <button class="back-link" data-goto="territoires" style="margin-top:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+    </section>
+
+    <!-- === CARTE INTERACTIVE === -->
+    <section class="panel" id="carte-interactive">
+      <button class="back-link" data-goto="territoires"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Retour aux Territoires</button>
+
+      <div class="eyebrow">Cartographie</div>
+      <h2 class="title">Carte d'Elyndor</h2>
+      <p class="subtitle">Molette pour zoomer, glisser pour te déplacer. Plus tu zoomes, plus les petites villes apparaissent. Utilise la recherche pour aller directement à une ville.</p>
+
+      <div class="map-explorer">
+        <aside class="map-sidebar">
+          <input type="text" id="map-search" class="map-search-input" placeholder="Rechercher une ville...">
+          <div id="map-city-list" class="map-city-list"></div>
+        </aside>
+        <div class="map-viewport" id="map-viewport">
+          <div class="map-zoom-controls">
+            <button id="map-zoom-in" type="button">+</button>
+            <button id="map-zoom-out" type="button">−</button>
+            <button id="map-zoom-reset" type="button">⤾</button>
+          </div>
+          <div class="map-hint">Molette = zoom · Glisser = déplacer</div>
+          <div class="map-canvas" id="map-canvas">
+            <img id="map-base-img" src="Elyndor.png" alt="Carte détaillée d'Elyndor" draggable="false">
+            <div id="map-labels"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
     <section class="panel" id="figures">
       <div class="eyebrow">Portraits</div>
       <h2 class="title">La Cour</h2>
-      <p class="subtitle">Asuna Ténébris est confirmée. Deux rôles majeurs restent disponibles.</p>
+      <p class="subtitle">Asuna Ténébris et Vaelrion Noxaris sont confirmés. Quatre rôles majeurs restent disponibles.</p>
 
       <div class="join-box" style="max-width:100%; margin-bottom:34px;">
         <div class="figure-feature">
@@ -981,31 +1122,21 @@
             <p class="lore italic" style="max-width:100%; margin-bottom:0;">Ce que personne à Vespera ne sait : à Astrevia, capitale du pays voisin, certains n'ont jamais cessé de la chercher — et comptent bien la ramener chez eux le jour où ils la retrouveront.</p>
           </div>
           <div class="figure-portrait">
-            <img src="asunaomg.png" alt="Portrait d'Asuna Ténébris, aux longs cheveux noirs et yeux rouges, vêtue de noir devant une cathédrale gothique">
+            <img src="asuna-portrait.png" alt="Portrait d'Asuna Ténébris, aux longs cheveux noirs et yeux rouges, vêtue de noir devant une cathédrale gothique">
           </div>
         </div>
       </div>
 
-      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l8-4 8 4M4 18l8 4 8-4"/></svg></div>
-      <p class="eyebrow" style="margin-top:0;">Rôles disponibles</p>
-      <p class="lore italic" style="margin-bottom:26px;">Deux postes majeurs sont encore vacants. Voici un modèle de fiche à remplir pour postuler — inspire-toi de la présentation d'Asuna ci-dessus.</p>
-
-      <div class="join-box" style="max-width:100%; margin-bottom:24px;">
+      <div class="join-box" style="max-width:100%; margin-bottom:34px;">
         <div class="figure-feature">
           <div>
-            <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
-            <h3 style="font-size:1.4rem;">Roi de Noctis</h3>
-            <div class="meta" style="margin-top:4px;">Astrevia — Souverain du pays</div>
-            <p class="lore" style="margin-top:14px; max-width:100%; font-style:normal;">À la tête de l'Empire et de ses quatre peuples, le Roi d'Astrevia règne sur un équilibre aussi fragile que la loyauté de sa cour. C'est aussi lui — ou son entourage — qui n'a jamais cessé de chercher Asuna Ténébris.</p>
-
-            <div style="margin-top:22px;">
-              <div class="fiche-field"><span class="flabel">Nom du personnage</span><span class="fvalue">Lorem Ipsum</span></div>
-              <div class="fiche-field"><span class="flabel">Âge / Race</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur.</span></div>
-              <div class="fiche-field"><span class="flabel">Apparence</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</span></div>
-              <div class="fiche-field"><span class="flabel">Histoire</span><span class="fvalue">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></div>
-              <div class="fiche-field"><span class="flabel">Personnalité</span><span class="fvalue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</span></div>
-              <div class="fiche-field"><span class="flabel">Lien avec Astrevia / Asuna</span><span class="fvalue">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</span></div>
-            </div>
+            <span class="card-tag" style="margin-bottom:14px;">Figure principale — Astrevia</span>
+            <h3 style="font-size:1.6rem;">Vaelrion Noxaris</h3>
+            <div class="meta" style="margin-top:4px;">Empereur de Ravenhold — Souverain de Noctis</div>
+            <p class="lore" style="margin-top:16px; max-width:100%;">Dernier descendant de la lignée Noxaris, Vaelrion est né d'une brève union entre la reine Satella Noxaris et un être dont l'existence relève presque de la légende : un Dragon du Chaos, d'une lignée que l'on croyait éteinte depuis longtemps. Pour son peuple, sa naissance fut perçue comme un miracle venu sauver la couronne de l'extinction. Sa mère mourut peu après son accession au trône, le laissant seul à la tête de Noctis, sans jamais avoir connu son père.</p>
+            <p class="lore" style="max-width:100%;">Sous son règne, Noctis connut une expansion sans précédent : trois royaumes annexés, un empire consolidé, une diplomatie aussi habile que sa stratégie militaire. Vaelrion est aujourd'hui un souverain glorifié, profondément aimé par son peuple — mais derrière l'image du roi victorieux se cache un homme marqué par deux absences : celle d'un père qu'il n'a jamais connu, et celle d'Asuna Ténébris, son ancienne conseillère et la seule personne à qui il ait jamais accordé une confiance sans réserve.</p>
+            <p class="lore" style="max-width:100%;">Le départ soudain d'Asuna, sans explication, fut vécu comme une trahison personnelle dont il ne s'est jamais vraiment remis. Depuis, il envoie régulièrement des soldats la rechercher à travers l'empire — en vain — et est devenu impitoyable envers quiconque ose trahir la couronne.</p>
+            <p class="lore italic" style="max-width:100%; margin-bottom:0;">Une rumeur discrète circule parfois parmi le peuple de Noctis : certains prétendent avoir aperçu d'étranges éclats dans son regard lors des batailles, et s'interrogent sur sa longévité anormale. Personne, cependant, ne soupçonne la véritable nature draconique de leur empereur.</p>
           </div>
           <div class="figure-portrait placeholder">
             <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -1014,7 +1145,11 @@
         </div>
       </div>
 
-      <div class="join-box" style="max-width:100%;">
+      <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l8-4 8 4M4 18l8 4 8-4"/></svg></div>
+      <p class="eyebrow" style="margin-top:0;">Rôles disponibles</p>
+      <p class="lore italic" style="margin-bottom:26px;">Le Gouverneur de Vespera et les trois Conseillers de Seacumère sont encore vacants. Voici un modèle de fiche à remplir pour postuler — inspire-toi des présentations d'Asuna et de Vaelrion ci-dessus.</p>
+
+      <div class="join-box" style="max-width:100%; margin-bottom:24px;">
         <div class="figure-feature">
           <div>
             <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
@@ -1037,27 +1172,99 @@
           </div>
         </div>
       </div>
+
+      <div class="join-box" style="max-width:100%; margin-bottom:24px;">
+        <div class="figure-feature">
+          <div>
+            <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
+            <h3 style="font-size:1.4rem;">Conseiller(ère) de Seacumère — Humain</h3>
+            <div class="meta" style="margin-top:4px;">Seacumère — Membre du Conseil</div>
+            <p class="lore" style="margin-top:14px; max-width:100%; font-style:normal;">Représentant(e) du peuple humain au sein du Conseil de Seacumère, garant des piliers de démocratie et de connaissance qui fondent la cité — aucune couronne ici, seulement des voix qui doivent s'entendre.</p>
+
+            <div style="margin-top:22px;">
+              <div class="fiche-field"><span class="flabel">Nom du personnage</span><span class="fvalue">Lorem Ipsum</span></div>
+              <div class="fiche-field"><span class="flabel">Âge</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur.</span></div>
+              <div class="fiche-field"><span class="flabel">Apparence</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</span></div>
+              <div class="fiche-field"><span class="flabel">Histoire</span><span class="fvalue">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></div>
+              <div class="fiche-field"><span class="flabel">Personnalité</span><span class="fvalue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</span></div>
+              <div class="fiche-field"><span class="flabel">Lien avec Seacumère</span><span class="fvalue">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</span></div>
+            </div>
+          </div>
+          <div class="figure-portrait placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span>Portrait à ajouter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="join-box" style="max-width:100%; margin-bottom:24px;">
+        <div class="figure-feature">
+          <div>
+            <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
+            <h3 style="font-size:1.4rem;">Conseiller(ère) de Seacumère — Fée</h3>
+            <div class="meta" style="margin-top:4px;">Seacumère — Membre du Conseil</div>
+            <p class="lore" style="margin-top:14px; max-width:100%; font-style:normal;">Représentant(e) du peuple féerique au sein du Conseil de Seacumère, garant des piliers de démocratie et de connaissance qui fondent la cité — aucune couronne ici, seulement des voix qui doivent s'entendre.</p>
+
+            <div style="margin-top:22px;">
+              <div class="fiche-field"><span class="flabel">Nom du personnage</span><span class="fvalue">Lorem Ipsum</span></div>
+              <div class="fiche-field"><span class="flabel">Âge</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur.</span></div>
+              <div class="fiche-field"><span class="flabel">Apparence</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</span></div>
+              <div class="fiche-field"><span class="flabel">Histoire</span><span class="fvalue">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></div>
+              <div class="fiche-field"><span class="flabel">Personnalité</span><span class="fvalue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</span></div>
+              <div class="fiche-field"><span class="flabel">Lien avec Seacumère</span><span class="fvalue">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</span></div>
+            </div>
+          </div>
+          <div class="figure-portrait placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span>Portrait à ajouter</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="join-box" style="max-width:100%;">
+        <div class="figure-feature">
+          <div>
+            <span class="card-tag" style="margin-bottom:14px;">Disponible</span>
+            <h3 style="font-size:1.4rem;">Conseiller(ère) de Seacumère — Elfe</h3>
+            <div class="meta" style="margin-top:4px;">Seacumère — Membre du Conseil</div>
+            <p class="lore" style="margin-top:14px; max-width:100%; font-style:normal;">Représentant(e) du peuple elfique au sein du Conseil de Seacumère, garant des piliers de démocratie et de connaissance qui fondent la cité — aucune couronne ici, seulement des voix qui doivent s'entendre.</p>
+
+            <div style="margin-top:22px;">
+              <div class="fiche-field"><span class="flabel">Nom du personnage</span><span class="fvalue">Lorem Ipsum</span></div>
+              <div class="fiche-field"><span class="flabel">Âge</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur.</span></div>
+              <div class="fiche-field"><span class="flabel">Apparence</span><span class="fvalue">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</span></div>
+              <div class="fiche-field"><span class="flabel">Histoire</span><span class="fvalue">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</span></div>
+              <div class="fiche-field"><span class="flabel">Personnalité</span><span class="fvalue">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.</span></div>
+              <div class="fiche-field"><span class="flabel">Lien avec Seacumère</span><span class="fvalue">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.</span></div>
+            </div>
+          </div>
+          <div class="figure-portrait placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#a2803f" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span>Portrait à ajouter</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- === REJOINDRE === -->
-     <section class="panel" id="rejoindre">
+    <section class="panel" id="rejoindre">
       <div class="eyebrow">Franchir le seuil</div>
       <h2 class="title">Rejoindre</h2>
-      <p class="subtitle">Ce qu'il faut savoir avant de commencer votre aventure magique.</p>
+      <p class="subtitle">Ce qu'il faut savoir avant de sceltyper votre premier pacte.</p>
 
       <div class="join-box">
         <h3>Rejoindre le serveur Discord</h3>
-        <p style="color:var(--ash); font-size:.92rem; line-height:1.7;">Venez prendre part à l'aventure !</p>
-        <a href="https://discord.gg/RGt86hCP3A" class="btn">Lien du serveur →</a>
+        <p style="color:var(--ash); font-size:.92rem; line-height:1.7;">Lorem ipsum dolor sit amet, consectetur adipiscing elit — lien d'invitation à ajouter ici.</p>
+        <a href="#" class="btn">Lien du serveur →</a>
       </div>
 
       <div class="divider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M4 6l8-4 8 4M4 18l8 4 8-4"/></svg></div>
 
       <p class="lore"><strong>Avant d'entrer :</strong></p>
       <div class="rules-list">
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Lisez et validez le règlement</p></div>
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Prenez connaissance du contexte si ce n'est pas déjà fait</p></div>
-        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Faites votre fiche et rejoignez l'aventure !</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Lorem ipsum dolor sit amet — première règle à préciser (respect, activité minimale, etc.).</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Consectetur adipiscing elit — deuxième règle, format des fiches de personnage attendu.</p></div>
+        <div class="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 4v6c0 5-4 8-9 10-5-2-9-5-9-10V6z"/></svg><p>Sed do eiusmod tempor — troisième règle, validation par le staff avant de rejoindre une ville.</p></div>
       </div>
     </section>
 
@@ -1085,6 +1292,224 @@
   document.querySelectorAll('[data-goto]').forEach(el => {
     el.addEventListener('click', () => showPanel(el.dataset.goto, 'territoires'));
   });
+</script>
+
+
+<script>
+const MAP_DATA = {"width":1595,"height":836,"burgs":[{"n":"Linterden","x":1330.5,"y":599.8,"s":"Wighamia","p":27.18,"c":1},{"n":"Athi","x":252.4,"y":323.3,"s":"Athi","p":28.02,"c":1},{"n":"Shifnal","x":1024.9,"y":763.1,"s":"Albrighia","p":28.72,"c":1},{"n":"Cudgeters","x":654.6,"y":719.9,"s":"Noctis","p":19.66,"c":0},{"n":"Modford","x":736.6,"y":417.6,"s":"Elyndor","p":20.25,"c":0},{"n":"Watbury","x":893.1,"y":659.4,"s":"Noctis","p":1.98,"c":0},{"n":"Redcheapsea","x":1240.5,"y":379.8,"s":"Wighamia","p":2.7,"c":0},{"n":"Ulbaragzig","x":1566.0,"y":773.1,"s":"Wighamia","p":16.4,"c":0},{"n":"Portsin","x":1209.1,"y":660.4,"s":"Wighamia","p":13.29,"c":0},{"n":"Perstoleby","x":1000.6,"y":761.5,"s":"Albrighia","p":24.69,"c":0},{"n":"Fazion","x":915.4,"y":449.5,"s":"Noctis","p":3.89,"c":0},{"n":"Redckerby","x":996.9,"y":453.5,"s":"Noctis","p":2.96,"c":0},{"n":"Congley","x":1423.8,"y":645.5,"s":"Wighamia","p":4.14,"c":0},{"n":"Warleigh","x":700.9,"y":453.7,"s":"Elyndor","p":3.19,"c":0},{"n":"Sidlewich","x":539.0,"y":433.1,"s":"Noctis","p":7.11,"c":0},{"n":"Facurymouth","x":928.6,"y":729.2,"s":"Noctis","p":14.87,"c":0},{"n":"Oakhampton","x":1358.7,"y":668.8,"s":"Wighamia","p":11.3,"c":0},{"n":"Kingham","x":433.5,"y":509.8,"s":"Noctis","p":2.43,"c":0},{"n":"Stapton","x":1301.8,"y":784.1,"s":"Wighamia","p":6.82,"c":0},{"n":"Ormshambe","x":810.4,"y":648.3,"s":"Noctis","p":2.17,"c":0},{"n":"Pesone","x":505.9,"y":561.3,"s":"Noctis","p":6.37,"c":0},{"n":"Forewich","x":1246.6,"y":557.0,"s":"Wighamia","p":15.65,"c":0},{"n":"Malboline","x":447.9,"y":337.3,"s":"Elyndor","p":5.38,"c":0},{"n":"Rothwark","x":737.2,"y":776.8,"s":"Noctis","p":14.79,"c":0},{"n":"Pickingham","x":997.9,"y":640.3,"s":"Noctis","p":2.31,"c":0},{"n":"Rolalerbeto","x":487.8,"y":660.4,"s":"Noctis","p":13.21,"c":0},{"n":"Shokedonces","x":1272.3,"y":645.7,"s":"Wighamia","p":2.22,"c":0},{"n":"Suirx","x":254.4,"y":313.3,"s":"Athi","p":10.09,"c":0},{"n":"Stanstovil","x":620.7,"y":431.5,"s":"Elyndor","p":5.14,"c":0},{"n":"Soutle","x":1173.0,"y":337.7,"s":"Wighamia","p":2.25,"c":0},{"n":"Bolingin","x":546.2,"y":593.0,"s":"Noctis","p":10.06,"c":0},{"n":"Westforden","x":875.4,"y":338.9,"s":"Elyndor","p":18.35,"c":0},{"n":"Duntonzan","x":814.1,"y":461.1,"s":"Elyndor","p":7.3,"c":0},{"n":"Casthe","x":1209.9,"y":313.1,"s":"Wighamia","p":2.08,"c":0},{"n":"Nemamersto","x":573.3,"y":587.1,"s":"Noctis","p":7.36,"c":0},{"n":"Chaulfalean","x":1078.5,"y":465.9,"s":"Noctis","p":1.63,"c":0},{"n":"Penkneth","x":531.7,"y":644.4,"s":"Noctis","p":7.06,"c":0},{"n":"Nylmna","x":965.5,"y":338.6,"s":"Elyndor","p":6.51,"c":0},{"n":"Draunalas","x":1050.5,"y":432.8,"s":"Noctis","p":1.99,"c":0},{"n":"Yeoweyles","x":1058.9,"y":645.2,"s":"Noctis","p":13.34,"c":0},{"n":"Mourylesham","x":1307.4,"y":661.0,"s":"Wighamia","p":3.45,"c":0},{"n":"Pendone","x":778.1,"y":559.9,"s":"Noctis","p":1.7,"c":0},{"n":"Penton","x":657.3,"y":561.3,"s":"Noctis","p":13.28,"c":0},{"n":"Aldock","x":885.6,"y":488.6,"s":"Noctis","p":1.91,"c":0},{"n":"Nanil","x":1119.7,"y":308.1,"s":"Wighamia","p":17.53,"c":0},{"n":"Retley","x":1294.8,"y":486.6,"s":"Wighamia","p":16.21,"c":0},{"n":"Tetfield","x":1246.1,"y":489.0,"s":"Wighamia","p":13.67,"c":0},{"n":"Penter","x":441.6,"y":407.0,"s":"Noctis","p":8.71,"c":0},{"n":"Thvethin","x":927.2,"y":299.4,"s":"Elyndor","p":5.06,"c":0},{"n":"Piclester","x":1309.2,"y":692.3,"s":"Wighamia","p":3.75,"c":0},{"n":"Tretown","x":1263.6,"y":573.5,"s":"Wighamia","p":7.86,"c":0},{"n":"Shorough","x":1439.1,"y":698.4,"s":"Wighamia","p":9.21,"c":0},{"n":"Knutshead","x":712.0,"y":590.2,"s":"Noctis","p":21.95,"c":0},{"n":"Bingdon","x":478.7,"y":506.1,"s":"Noctis","p":5.39,"c":0},{"n":"Credonbury","x":788.9,"y":750.0,"s":"Noctis","p":1.51,"c":0},{"n":"Marlmondle","x":594.4,"y":432.5,"s":"Elyndor","p":2.45,"c":0},{"n":"Bunmouth","x":1149.8,"y":636.1,"s":"Wighamia","p":2.15,"c":0},{"n":"Dunstorough","x":1299.1,"y":594.8,"s":"Wighamia","p":1.89,"c":0},{"n":"Staple","x":1438.8,"y":651.5,"s":"Wighamia","p":1.63,"c":0},{"n":"Kilkburgh","x":1504.7,"y":675.0,"s":"Wighamia","p":15.64,"c":0},{"n":"Rrar'thi","x":156.3,"y":235.2,"s":"Athi","p":6.28,"c":0},{"n":"Uxbridbury","x":504.4,"y":570,"s":"Noctis","p":6.08,"c":0},{"n":"Bodhurst","x":471.3,"y":435.7,"s":"Noctis","p":2.3,"c":0},{"n":"Figanbume","x":930.9,"y":642.6,"s":"Noctis","p":1.69,"c":0},{"n":"Harming","x":1280.8,"y":366.2,"s":"Wighamia","p":15.48,"c":0},{"n":"Cambridgeby","x":1198.9,"y":675.8,"s":"Wighamia","p":8.83,"c":0},{"n":"Winewicham","x":515.1,"y":460.1,"s":"Noctis","p":2.35,"c":0},{"n":"Salceston","x":1505.3,"y":663.1,"s":"Wighamia","p":1.89,"c":0},{"n":"Watfieldge","x":788,"y":742.5,"s":"Noctis","p":2.03,"c":0},{"n":"Barton","x":790.8,"y":717.5,"s":"Noctis","p":21.99,"c":0},{"n":"Reasingster","x":651.7,"y":547.9,"s":"Noctis","p":9.11,"c":0},{"n":"Darton","x":1517.8,"y":601.9,"s":"Wighamia","p":13.91,"c":0},{"n":"Lumerid","x":562.7,"y":389.1,"s":"Elyndor","p":7.53,"c":0},{"n":"Hornverling","x":347.5,"y":411.8,"s":"Athi","p":5.38,"c":0},{"n":"Pontefnal","x":1301.7,"y":743.4,"s":"Wighamia","p":5.43,"c":0},{"n":"Atescom","x":464.9,"y":534.3,"s":"Noctis","p":19.27,"c":0},{"n":"Lelinetum","x":619.8,"y":687.8,"s":"Noctis","p":11.24,"c":0},{"n":"Birfordge","x":1332.8,"y":656.8,"s":"Wighamia","p":2.94,"c":0},{"n":"Cambrid","x":1253.8,"y":517.8,"s":"Wighamia","p":5.12,"c":0},{"n":"Bermingham","x":1254.1,"y":486.6,"s":"Wighamia","p":1.68,"c":0},{"n":"Draxted","x":1188.1,"y":469,"s":"Wighamia","p":5.85,"c":0},{"n":"Ormshilbo","x":364.7,"y":335.8,"s":"Athi","p":14.25,"c":0},{"n":"Knutsterham","x":1508.0,"y":632.4,"s":"Wighamia","p":7.27,"c":0},{"n":"Thaxning","x":778.1,"y":452.8,"s":"Elyndor","p":5.76,"c":0},{"n":"Dytestedge","x":1265.3,"y":709.2,"s":"Wighamia","p":8.79,"c":0},{"n":"Keatharen","x":1090.6,"y":490.3,"s":"Noctis","p":14.18,"c":0},{"n":"Marduegro","x":518,"y":713.4,"s":"Noctis","p":4.93,"c":0},{"n":"Skipton","x":1150.6,"y":506.6,"s":"Wighamia","p":18.36,"c":0},{"n":"Paigndalney","x":348.4,"y":314.4,"s":"Athi","p":20.77,"c":0},{"n":"Apsearen","x":817.8,"y":720.0,"s":"Noctis","p":1.7,"c":0},{"n":"Creqeeqee","x":282.8,"y":149.3,"s":"Athi","p":1.0,"c":0},{"n":"Kinbuton","x":1263.9,"y":435.5,"s":"Wighamia","p":2.26,"c":0},{"n":"Colide","x":860.2,"y":548.5,"s":"Noctis","p":10.68,"c":0},{"n":"Buckerden","x":884.3,"y":688.6,"s":"Noctis","p":1.07,"c":0},{"n":"Dunshomer","x":718.4,"y":771.4,"s":"Noctis","p":8.76,"c":0},{"n":"Bamney","x":1188.0,"y":562.6,"s":"Wighamia","p":2.64,"c":0},{"n":"Witford","x":1159.6,"y":532.6,"s":"Wighamia","p":2.5,"c":0},{"n":"Wislexe","x":781.3,"y":666.0,"s":"Noctis","p":9.08,"c":0},{"n":"Penrith","x":458.3,"y":491.3,"s":"Noctis","p":1.05,"c":0},{"n":"Kenbeck","x":917.5,"y":651.9,"s":"Noctis","p":2.67,"c":0},{"n":"Stotford","x":1234.0,"y":807.1,"s":"Wighamia","p":12.86,"c":0},{"n":"Cockington","x":525.3,"y":437.3,"s":"Noctis","p":15.21,"c":0},{"n":"Congtondo","x":1410.5,"y":618.6,"s":"Wighamia","p":1.81,"c":0},{"n":"Halton","x":1431.2,"y":610.3,"s":"Wighamia","p":15.25,"c":0},{"n":"Atbury","x":1235.7,"y":688.8,"s":"Wighamia","p":2.12,"c":0},{"n":"Westckerton","x":1496.2,"y":726.2,"s":"Wighamia","p":6.93,"c":0},{"n":"Cartonce","x":1330.7,"y":621,"s":"Wighamia","p":3.62,"c":0},{"n":"Skipseading","x":914.6,"y":456.4,"s":"Noctis","p":1.83,"c":0},{"n":"Westckerley","x":1307.6,"y":446.9,"s":"Wighamia","p":9.96,"c":0},{"n":"Ollmmar","x":1026.1,"y":494.1,"s":"Noctis","p":9.35,"c":0},{"n":"Reatestoli","x":1434.3,"y":599.0,"s":"Wighamia","p":5.03,"c":0},{"n":"Nesolestab","x":921.5,"y":683.2,"s":"Noctis","p":11.85,"c":0},{"n":"Petonta","x":1407.8,"y":681.8,"s":"Wighamia","p":21.0,"c":0},{"n":"Axbleham","x":429.1,"y":505.1,"s":"Noctis","p":1.08,"c":0},{"n":"Kenrith","x":1497.0,"y":670.2,"s":"Wighamia","p":15.08,"c":0},{"n":"Brastabrid","x":680.9,"y":731.2,"s":"Noctis","p":2.46,"c":0},{"n":"Stanzantef","x":420.8,"y":514.8,"s":"Noctis","p":2.3,"c":0},{"n":"Momavateli","x":439.9,"y":678.2,"s":"Noctis","p":3.16,"c":0},{"n":"Shifractham","x":645.2,"y":605.2,"s":"Noctis","p":9.67,"c":0},{"n":"Pewentford","x":1395.5,"y":756.1,"s":"Wighamia","p":1.18,"c":0},{"n":"Congton","x":454.3,"y":503.5,"s":"Noctis","p":1.49,"c":0},{"n":"Birmouth","x":934.6,"y":667.5,"s":"Noctis","p":15.13,"c":0},{"n":"Somertonor","x":1273.1,"y":512.0,"s":"Wighamia","p":8.56,"c":0},{"n":"Mitford","x":771.1,"y":613.7,"s":"Noctis","p":8.23,"c":0},{"n":"Miltoney","x":1014.9,"y":696.7,"s":"Noctis","p":4.89,"c":0},{"n":"Albrigh","x":285.2,"y":365.2,"s":"Athi","p":1.8,"c":0},{"n":"Osingay","x":1248.4,"y":632.6,"s":"Wighamia","p":13.8,"c":0},{"n":"Rockewester","x":1239.3,"y":537.2,"s":"Wighamia","p":2.86,"c":0},{"n":"Kinley","x":820.9,"y":465.3,"s":"Elyndor","p":12.4,"c":0},{"n":"Altbutontef","x":535.5,"y":315.1,"s":"Elyndor","p":1.5,"c":0},{"n":"Nelo'an","x":1116.8,"y":500.1,"s":"Wighamia","p":4.12,"c":0},{"n":"Norham","x":1069.4,"y":649.2,"s":"Noctis","p":7.45,"c":0},{"n":"Louthbrid","x":800.8,"y":649.4,"s":"Noctis","p":1.01,"c":0},{"n":"Northingham","x":1246.8,"y":377.2,"s":"Wighamia","p":4.51,"c":0},{"n":"Ariondor","x":969.4,"y":216.6,"s":"Elyndor","p":0.77,"c":0},{"n":"Stothambe","x":1349.4,"y":570.0,"s":"Wighamia","p":5.16,"c":0},{"n":"Wiston","x":341.1,"y":335.9,"s":"Athi","p":11.47,"c":0},{"n":"Hornbury","x":457.0,"y":454.3,"s":"Noctis","p":6.64,"c":0},{"n":"Sidhurstham","x":737.7,"y":744.2,"s":"Noctis","p":1.78,"c":0},{"n":"Seamersted","x":478.4,"y":470.8,"s":"Noctis","p":3.17,"c":0},{"n":"Charham","x":737.5,"y":656.4,"s":"Noctis","p":13.12,"c":0},{"n":"Newbigle","x":879.5,"y":652.5,"s":"Noctis","p":5.65,"c":0},{"n":"Tutham","x":1269.7,"y":816.0,"s":"Wighamia","p":9.06,"c":0},{"n":"Wihulton","x":526.4,"y":616.2,"s":"Noctis","p":3.11,"c":0},{"n":"Launtonter","x":704.8,"y":740.8,"s":"Noctis","p":11.71,"c":0},{"n":"Shifton","x":735.6,"y":716.7,"s":"Noctis","p":6.03,"c":0},{"n":"Westhe","x":1347.0,"y":492.4,"s":"Wighamia","p":12.45,"c":0},{"n":"Hanlon","x":1112.6,"y":233.9,"s":"Wighamia","p":2.46,"c":0},{"n":"Maleringley","x":938.3,"y":511.1,"s":"Noctis","p":3.58,"c":0},{"n":"Thetham","x":838.3,"y":561.2,"s":"Noctis","p":6.12,"c":0},{"n":"Burden","x":722.9,"y":651.8,"s":"Noctis","p":1.93,"c":0},{"n":"Knutshambe","x":240.2,"y":338.9,"s":"Athi","p":2.13,"c":0},{"n":"Botlewent","x":886.7,"y":651.2,"s":"Noctis","p":8.13,"c":0},{"n":"Haldock","x":905.8,"y":624.8,"s":"Noctis","p":1.47,"c":0},{"n":"Tretonton","x":985.8,"y":465.9,"s":"Noctis","p":1.17,"c":0},{"n":"Ulilnelion","x":1105.1,"y":305.6,"s":"Wighamia","p":1.09,"c":0},{"n":"Westckerton","x":964.6,"y":592.2,"s":"Noctis","p":5.0,"c":0},{"n":"Lelola","x":447.8,"y":633.8,"s":"Noctis","p":16.13,"c":0},{"n":"Paignces","x":1299.3,"y":628.5,"s":"Wighamia","p":1.65,"c":0},{"n":"Prestore","x":876.7,"y":556.7,"s":"Noctis","p":5.26,"c":0},{"n":"Burham","x":841.3,"y":724.7,"s":"Noctis","p":6.4,"c":0},{"n":"Kaszaila","x":394.6,"y":156.3,"s":"Athi","p":2.51,"c":0},{"n":"Southel","x":824.7,"y":333.2,"s":"Elyndor","p":11.3,"c":0},{"n":"Towbigford","x":1038.7,"y":777.4,"s":"Albrighia","p":1.07,"c":0},{"n":"Ormster","x":776.4,"y":786.9,"s":"Noctis","p":2.98,"c":0},{"n":"Grantham","x":714.5,"y":605.4,"s":"Noctis","p":2.3,"c":0},{"n":"Lympstabrid","x":1408,"y":777.8,"s":"Wighamia","p":8.66,"c":0},{"n":"Bothe","x":629.6,"y":585.2,"s":"Noctis","p":9.06,"c":0},{"n":"Sylran","x":1058.2,"y":394.6,"s":"Noctis","p":4.12,"c":0},{"n":"Penkwar","x":1234.8,"y":633.6,"s":"Wighamia","p":6.81,"c":0},{"n":"Grantham","x":909.2,"y":431.4,"s":"Noctis","p":5.16,"c":0},{"n":"Knutston","x":548.0,"y":445.6,"s":"Elyndor","p":1.49,"c":0},{"n":"Totham","x":462.7,"y":420.6,"s":"Noctis","p":19.98,"c":0},{"n":"Lerunna","x":595.6,"y":654.9,"s":"Noctis","p":9.76,"c":0},{"n":"Petondole","x":817.3,"y":483.9,"s":"Elyndor","p":7.28,"c":0},{"n":"Macker","x":831.3,"y":445.7,"s":"Elyndor","p":3.33,"c":0},{"n":"Orlisbury","x":1017.9,"y":827.7,"s":"Albrighia","p":1.0,"c":0},{"n":"Cleorough","x":922.2,"y":452.8,"s":"Noctis","p":6.08,"c":0},{"n":"Foverling","x":586.4,"y":632.9,"s":"Noctis","p":3.96,"c":0},{"n":"Paignces","x":794.2,"y":596.1,"s":"Noctis","p":9.3,"c":0},{"n":"Cannsca","x":447.1,"y":625.5,"s":"Noctis","p":6.22,"c":0},{"n":"Anverpor","x":841.1,"y":701.6,"s":"Noctis","p":5.7,"c":0},{"n":"Framplerid","x":1317.6,"y":815.3,"s":"Wighamia","p":5.21,"c":0},{"n":"Winkhamp","x":1297,"y":451.9,"s":"Wighamia","p":15.29,"c":0},{"n":"Cambrigh","x":1377.8,"y":568.8,"s":"Wighamia","p":10.41,"c":0},{"n":"Sudbury","x":962.9,"y":710.7,"s":"Noctis","p":12.0,"c":0},{"n":"Carfordbury","x":422.2,"y":495.7,"s":"Noctis","p":18.2,"c":0},{"n":"Thornmouth","x":586.5,"y":637.5,"s":"Noctis","p":2.48,"c":0},{"n":"Swarenby","x":1199.8,"y":818.2,"s":"Wighamia","p":6.77,"c":0},{"n":"Berton","x":868.8,"y":349.8,"s":"Elyndor","p":3.96,"c":0},{"n":"Llaughedi","x":1093.3,"y":319.4,"s":"Wighamia","p":6.47,"c":0},{"n":"Reton","x":530.5,"y":400.9,"s":"Noctis","p":1.48,"c":0},{"n":"Pershilbo","x":863.4,"y":691.3,"s":"Noctis","p":2.1,"c":0},{"n":"Taford","x":851.9,"y":695.3,"s":"Noctis","p":11.32,"c":0},{"n":"Dodbrid","x":793.8,"y":479.8,"s":"Elyndor","p":10.17,"c":0},{"n":"Knutston","x":796.0,"y":743.2,"s":"Noctis","p":2.35,"c":0},{"n":"Atford","x":604.9,"y":439.6,"s":"Elyndor","p":6.77,"c":0},{"n":"Styr","x":291.4,"y":198.6,"s":"Athi","p":10.82,"c":0},{"n":"Aleandesthe","x":1117.3,"y":262.6,"s":"Wighamia","p":5.08,"c":0},{"n":"Samerster","x":1279.3,"y":661.9,"s":"Wighamia","p":1.63,"c":0},{"n":"Axbrid","x":1295.2,"y":564.4,"s":"Wighamia","p":0.9,"c":0},{"n":"Lympsham","x":1208.7,"y":488.4,"s":"Wighamia","p":5.97,"c":0},{"n":"Hatbury","x":1392.7,"y":628.4,"s":"Wighamia","p":14.14,"c":0},{"n":"Brampsea","x":549.0,"y":586.3,"s":"Noctis","p":1.66,"c":0},{"n":"Witfield","x":455.6,"y":540.0,"s":"Noctis","p":7.2,"c":0},{"n":"Fineseyme","x":1234.5,"y":820.8,"s":"Wighamia","p":0.9,"c":0},{"n":"Harton","x":1167.8,"y":606.0,"s":"Wighamia","p":13.94,"c":0},{"n":"Hitcheston","x":1143.3,"y":312.3,"s":"Wighamia","p":5.61,"c":0},{"n":"Feling","x":1401.0,"y":753.8,"s":"Wighamia","p":12.84,"c":0},{"n":"Guildgewich","x":642.1,"y":563.8,"s":"Noctis","p":11.82,"c":0},{"n":"Tigandalces","x":968.5,"y":463.2,"s":"Noctis","p":6.93,"c":0},{"n":"Moutondone","x":1282.8,"y":515.5,"s":"Wighamia","p":7.13,"c":0},{"n":"Olcested","x":489.0,"y":327.9,"s":"Elyndor","p":1.01,"c":0},{"n":"Wigton","x":809.4,"y":533.4,"s":"Elyndor","p":9.6,"c":0},{"n":"Winchwark","x":1251.0,"y":541.2,"s":"Wighamia","p":4.71,"c":0},{"n":"Cockingdon","x":777.9,"y":670.7,"s":"Noctis","p":16.65,"c":0},{"n":"Ralelum","x":462.9,"y":652.4,"s":"Noctis","p":1.91,"c":0},{"n":"Boshover","x":446.1,"y":468.8,"s":"Noctis","p":3.38,"c":0},{"n":"Reacury","x":706.9,"y":699.8,"s":"Noctis","p":12.45,"c":0},{"n":"Boshiling","x":1543.6,"y":555.4,"s":"Wighamia","p":2.35,"c":0},{"n":"Towbig","x":865,"y":637.2,"s":"Noctis","p":7.62,"c":0},{"n":"Stapton","x":1468.2,"y":663.8,"s":"Wighamia","p":15.87,"c":0},{"n":"Darhambeley","x":751.5,"y":407.5,"s":"Elyndor","p":9.73,"c":0},{"n":"Pregiorum","x":515.6,"y":711.1,"s":"Noctis","p":10.58,"c":0},{"n":"Prested","x":1318.8,"y":454.6,"s":"Wighamia","p":16.27,"c":0},{"n":"Kington","x":685.7,"y":673.2,"s":"Noctis","p":11.39,"c":0},{"n":"Olinium","x":526.0,"y":700.6,"s":"Noctis","p":16.01,"c":0},{"n":"Bolseacuton","x":1188.3,"y":818.5,"s":"Albrighia","p":0.85,"c":0},{"n":"Norlowleigh","x":811.8,"y":605.3,"s":"Noctis","p":7.58,"c":0},{"n":"Gatley","x":1003.8,"y":667.8,"s":"Noctis","p":2.06,"c":0},{"n":"Portstonton","x":984.0,"y":776.1,"s":"Albrighia","p":6.65,"c":0},{"n":"Helsterby","x":1340.9,"y":504.8,"s":"Wighamia","p":0.86,"c":0},{"n":"Gaburak","x":1496.4,"y":812.1,"s":"Wighamia","p":7.17,"c":0},{"n":"Kihultash","x":895.9,"y":559.4,"s":"Noctis","p":1.26,"c":0},{"n":"Wasalton","x":1285.1,"y":382.9,"s":"Wighamia","p":0.92,"c":0},{"n":"Moutonzan","x":1231.7,"y":476.1,"s":"Wighamia","p":5.48,"c":0},{"n":"Somerke","x":1450.5,"y":619.2,"s":"Wighamia","p":2.94,"c":0},{"n":"Salton","x":509.0,"y":622.0,"s":"Noctis","p":9.11,"c":0},{"n":"Bingdon","x":895.1,"y":544.6,"s":"Noctis","p":13.15,"c":0},{"n":"Bonedine","x":983.5,"y":737.5,"s":"Albrighia","p":3.24,"c":0},{"n":"Tareley","x":902.4,"y":469.5,"s":"Noctis","p":12.67,"c":0},{"n":"Shemmarlonde","x":972.6,"y":312.7,"s":"Elyndor","p":1.54,"c":0},{"n":"Thaxted","x":603.4,"y":614.8,"s":"Noctis","p":4.83,"c":0},{"n":"Berlow","x":1499.4,"y":730.8,"s":"Wighamia","p":1.09,"c":0},{"n":"Siquarith","x":1128.6,"y":494.2,"s":"Wighamia","p":6.3,"c":0},{"n":"Borough","x":781.0,"y":648.0,"s":"Noctis","p":8.47,"c":0},{"n":"Whitham","x":950.6,"y":755.0,"s":"Albrighia","p":6.27,"c":0},{"n":"Bridgeton","x":661.0,"y":708.9,"s":"Noctis","p":6.05,"c":0},{"n":"Tremamerton","x":534.5,"y":548.7,"s":"Noctis","p":3.31,"c":0},{"n":"Mitford","x":1381.9,"y":688.6,"s":"Wighamia","p":13.76,"c":0},{"n":"Piclifract","x":603.5,"y":437.5,"s":"Elyndor","p":1.85,"c":0},{"n":"Berwickneth","x":766.4,"y":509.4,"s":"Elyndor","p":1.93,"c":0},{"n":"Thatcking","x":830.4,"y":321.9,"s":"Elyndor","p":16.61,"c":0},{"n":"Northton","x":828.7,"y":677.3,"s":"Noctis","p":7.56,"c":0},{"n":"Kilkburgham","x":599.2,"y":402.6,"s":"Elyndor","p":11.97,"c":0},{"n":"Usharb","x":1420.1,"y":805.9,"s":"Wighamia","p":5.72,"c":0},{"n":"Wroggal","x":188.3,"y":165.1,"s":"Athi","p":14.16,"c":0},{"n":"Witbury","x":735.0,"y":662.5,"s":"Noctis","p":10.82,"c":0},{"n":"Kencesmouth","x":343.0,"y":363.2,"s":"Athi","p":2.25,"c":0},{"n":"Heyfieldbu","x":725.4,"y":680.7,"s":"Noctis","p":13.0,"c":0},{"n":"Witfield","x":1023.5,"y":633.1,"s":"Noctis","p":9.13,"c":0},{"n":"Oakley","x":772.2,"y":659.5,"s":"Noctis","p":8.12,"c":0},{"n":"Torkwarbury","x":922.3,"y":726.3,"s":"Noctis","p":5.88,"c":0},{"n":"Solive","x":434.1,"y":571.5,"s":"Noctis","p":2.77,"c":0},{"n":"Shifractham","x":1245.1,"y":586.8,"s":"Wighamia","p":1.9,"c":0},{"n":"Kharbhizd","x":1549.3,"y":747.5,"s":"Wighamia","p":11.18,"c":0},{"n":"Congmowen","x":869.1,"y":707.1,"s":"Noctis","p":2.19,"c":0},{"n":"Pullum","x":597.3,"y":682.7,"s":"Noctis","p":4.1,"c":0},{"n":"Whitfordge","x":490.7,"y":367.7,"s":"Noctis","p":1.72,"c":0},{"n":"Tremacury","x":1331.4,"y":827.1,"s":"Wighamia","p":1.41,"c":0},{"n":"Nalyriondos","x":398.7,"y":107.3,"s":"Neutrals","p":1.46,"c":0},{"n":"Glamzofs","x":261.3,"y":301.2,"s":"Athi","p":5.32,"c":0},{"n":"Charmouth","x":644.4,"y":431.3,"s":"Elyndor","p":10.83,"c":0},{"n":"Hinckneth","x":1537.3,"y":563.5,"s":"Wighamia","p":2.97,"c":0},{"n":"Birporleigh","x":558.6,"y":533.7,"s":"Noctis","p":2.4,"c":0},{"n":"Batonbuton","x":960.7,"y":684.4,"s":"Noctis","p":1.7,"c":0},{"n":"Persfordge","x":1273.6,"y":364.8,"s":"Wighamia","p":2.88,"c":0},{"n":"Tineton","x":1218.0,"y":290.9,"s":"Wighamia","p":8.26,"c":0},{"n":"Thetfordge","x":340.8,"y":296.6,"s":"Athi","p":3.6,"c":0},{"n":"Hertre","x":1243.5,"y":648.7,"s":"Wighamia","p":12.4,"c":0},{"n":"Kinemading","x":1367.1,"y":787.3,"s":"Wighamia","p":11.75,"c":0},{"n":"Maragelmond","x":980.2,"y":476.8,"s":"Noctis","p":3.8,"c":0},{"n":"Dudmanches","x":1260.3,"y":337.5,"s":"Wighamia","p":4.09,"c":0},{"n":"Kingdon","x":575.7,"y":564.7,"s":"Noctis","p":1.16,"c":0},{"n":"Thil-Zed","x":958.7,"y":319.5,"s":"Elyndor","p":6.62,"c":0},{"n":"Thetbury","x":830.9,"y":388.0,"s":"Elyndor","p":5.1,"c":0},{"n":"Phax","x":261.4,"y":285.1,"s":"Athi","p":4.46,"c":0},{"n":"Standal","x":430.2,"y":588.1,"s":"Noctis","p":1.05,"c":0},{"n":"Kilksey","x":465.8,"y":488.4,"s":"Noctis","p":4.68,"c":0},{"n":"Marldock","x":946,"y":732.9,"s":"Noctis","p":2.2,"c":0},{"n":"Sovilmedive","x":1346.5,"y":691.0,"s":"Wighamia","p":5.02,"c":0},{"n":"Hluimytenat","x":939.0,"y":302.3,"s":"Elyndor","p":11.07,"c":0},{"n":"Wenton","x":1326.3,"y":721.2,"s":"Wighamia","p":8.34,"c":0},{"n":"Balishead","x":1341.7,"y":825.3,"s":"Wighamia","p":6.24,"c":0},{"n":"Boshilton","x":580.2,"y":598.4,"s":"Noctis","p":1.03,"c":0},{"n":"Skipsea","x":1334.6,"y":454.3,"s":"Wighamia","p":12.76,"c":0},{"n":"Borexeho","x":560.0,"y":365.7,"s":"Elyndor","p":8.32,"c":0},{"n":"Hadria","x":460.1,"y":674.5,"s":"Noctis","p":5.91,"c":0},{"n":"Bostedling","x":1528.1,"y":713.6,"s":"Wighamia","p":1.61,"c":0},{"n":"Betford","x":1534.4,"y":601.7,"s":"Wighamia","p":0.64,"c":0},{"n":"Modmin","x":898.1,"y":776.5,"s":"Albrighia","p":7.26,"c":0},{"n":"Teton","x":930.4,"y":806.7,"s":"Albrighia","p":4.1,"c":0},{"n":"Blandmin","x":814.2,"y":769.2,"s":"Noctis","p":3.32,"c":0},{"n":"Draxningmo","x":408.4,"y":336.4,"s":"Athi","p":8.39,"c":0},{"n":"Marshin","x":663.3,"y":540.9,"s":"Noctis","p":4.64,"c":0},{"n":"Duricia","x":536.6,"y":678.9,"s":"Noctis","p":1.81,"c":0},{"n":"Shersbury","x":896.7,"y":812.5,"s":"Albrighia","p":5.32,"c":0},{"n":"Malmond","x":1275.3,"y":729.5,"s":"Wighamia","p":1.09,"c":0},{"n":"Kharag","x":1474.3,"y":776.8,"s":"Wighamia","p":2.87,"c":0},{"n":"Pickingham","x":538.7,"y":342.1,"s":"Elyndor","p":1.47,"c":0},{"n":"Skipton","x":851.5,"y":660.3,"s":"Noctis","p":8.59,"c":0},{"n":"Chipingdon","x":1094.4,"y":789.2,"s":"Albrighia","p":1.26,"c":0},{"n":"Finewentham","x":910.3,"y":665.9,"s":"Noctis","p":0.98,"c":0},{"n":"Chilter","x":589.8,"y":391.5,"s":"Elyndor","p":6.38,"c":0},{"n":"Midgere","x":1457.7,"y":735.3,"s":"Wighamia","p":20.75,"c":0},{"n":"Newcescombe","x":1126.5,"y":811.2,"s":"Albrighia","p":1.89,"c":0},{"n":"Picker","x":597.9,"y":453.8,"s":"Elyndor","p":7.36,"c":0},{"n":"Altford","x":883.0,"y":702.9,"s":"Noctis","p":1.22,"c":0},{"n":"Causmouth","x":1309.0,"y":718.1,"s":"Wighamia","p":7.33,"c":0},{"n":"Wisted","x":770.6,"y":702.6,"s":"Noctis","p":1.84,"c":0},{"n":"Manchleach","x":891.1,"y":514.8,"s":"Noctis","p":3.39,"c":0},{"n":"Yeolebydon","x":879.6,"y":553.2,"s":"Noctis","p":8.44,"c":0},{"n":"Reazion","x":773.2,"y":765.5,"s":"Noctis","p":28.66,"c":0},{"n":"Helston","x":701.5,"y":464.5,"s":"Elyndor","p":11.98,"c":0},{"n":"Oltonby","x":797.8,"y":527.5,"s":"Elyndor","p":9.44,"c":0},{"n":"Charnewich","x":1308.9,"y":515.6,"s":"Wighamia","p":5.99,"c":0},{"n":"Torkham","x":388.0,"y":338.4,"s":"Athi","p":1.83,"c":0},{"n":"Weylesford","x":489.1,"y":444.5,"s":"Noctis","p":2.01,"c":0},{"n":"Ostolideter","x":1342.1,"y":763.6,"s":"Wighamia","p":2.16,"c":0},{"n":"Thetre","x":1210.9,"y":627.3,"s":"Wighamia","p":15.49,"c":0},{"n":"Marldock","x":1310.8,"y":831.0,"s":"Wighamia","p":5.51,"c":0},{"n":"Salworth","x":1500.7,"y":588.1,"s":"Wighamia","p":4.1,"c":0},{"n":"Barham","x":1284.0,"y":817.9,"s":"Wighamia","p":0.85,"c":0},{"n":"Alington","x":796.0,"y":439.2,"s":"Elyndor","p":5.87,"c":0},{"n":"Wamers","x":769.9,"y":413.5,"s":"Elyndor","p":1.05,"c":0},{"n":"Shershambe","x":1278.8,"y":631.1,"s":"Wighamia","p":4.16,"c":0},{"n":"Thatclif","x":1496.2,"y":640.9,"s":"Wighamia","p":0.95,"c":0},{"n":"Daltash","x":994.9,"y":631.3,"s":"Noctis","p":7.22,"c":0},{"n":"Witford","x":1395.7,"y":587.0,"s":"Wighamia","p":3.2,"c":0},{"n":"Launbeck","x":808.8,"y":740.4,"s":"Noctis","p":5.13,"c":0},{"n":"Malmondge","x":480.5,"y":618.4,"s":"Noctis","p":3.9,"c":0},{"n":"Berpor","x":1174.9,"y":811.0,"s":"Albrighia","p":2.06,"c":0},{"n":"Waveniltash","x":982,"y":797.1,"s":"Albrighia","p":4.42,"c":0},{"n":"Castham","x":1036.1,"y":829.6,"s":"Albrighia","p":5.58,"c":0},{"n":"Savorum","x":565.0,"y":642.3,"s":"Noctis","p":9.8,"c":0},{"n":"Apton","x":1257.3,"y":362.0,"s":"Wighamia","p":4.33,"c":0},{"n":"Skiplewent","x":481.1,"y":390.9,"s":"Noctis","p":1.0,"c":0},{"n":"Westhe","x":798.8,"y":523.5,"s":"Elyndor","p":12.01,"c":0},{"n":"Lympster","x":1053.7,"y":811.5,"s":"Albrighia","p":22.27,"c":0},{"n":"Nulukkhund","x":1481.1,"y":810.1,"s":"Wighamia","p":9.6,"c":0},{"n":"Dunstore","x":1235.0,"y":493.6,"s":"Wighamia","p":3.78,"c":0},{"n":"Penksey","x":900.2,"y":687.3,"s":"Noctis","p":3.35,"c":0},{"n":"Cleorough","x":1151.1,"y":296.6,"s":"Wighamia","p":4.25,"c":0},{"n":"Knutscom","x":1263.1,"y":826.5,"s":"Wighamia","p":0.9,"c":0},{"n":"Preston","x":747.5,"y":621.2,"s":"Noctis","p":1.6,"c":0},{"n":"Buckingle","x":1480.2,"y":709.8,"s":"Wighamia","p":13.2,"c":0},{"n":"Oakleigh","x":1272.7,"y":622.5,"s":"Wighamia","p":7.19,"c":0},{"n":"Presham","x":1368.5,"y":570.5,"s":"Wighamia","p":6.46,"c":0},{"n":"Draxningham","x":1491.5,"y":687.5,"s":"Wighamia","p":5.25,"c":0},{"n":"Astrevia","x":726.8,"y":707.1,"s":"Noctis","p":16.67,"c":1},{"n":"Wihul","x":1185.8,"y":326.2,"s":"Wighamia","p":7.89,"c":0},{"n":"Cej'jigegus","x":260.4,"y":413.8,"s":"Athi","p":3.89,"c":0},{"n":"Lympstonton","x":630.8,"y":446.8,"s":"Elyndor","p":29.74,"c":0},{"n":"Witrinch","x":773.5,"y":610.8,"s":"Noctis","p":1.52,"c":0},{"n":"Forere","x":651.6,"y":578.9,"s":"Noctis","p":5.87,"c":0},{"n":"Blix","x":251.5,"y":182.1,"s":"Athi","p":11.77,"c":0},{"n":"Weningtham","x":997.0,"y":677.3,"s":"Noctis","p":1.79,"c":0},{"n":"Skipton","x":1263.8,"y":364.0,"s":"Wighamia","p":5.52,"c":0},{"n":"Nananor","x":1044.4,"y":397.9,"s":"Noctis","p":1.07,"c":0},{"n":"Foleley","x":1451.3,"y":700.0,"s":"Wighamia","p":5.32,"c":0},{"n":"Newleighbou","x":1220.1,"y":618.4,"s":"Wighamia","p":6.79,"c":0},{"n":"Southam","x":1495.9,"y":713.5,"s":"Wighamia","p":2.9,"c":0},{"n":"Dolarilel","x":1028.7,"y":399.8,"s":"Noctis","p":2.1,"c":0},{"n":"Wlasin","x":1021.2,"y":264.3,"s":"Wighamia","p":4.91,"c":0},{"n":"Sherswestho","x":745.3,"y":772.2,"s":"Noctis","p":1.21,"c":0},{"n":"Ulshebel","x":1076.9,"y":382.4,"s":"Wighamia","p":16.88,"c":0},{"n":"Sealere","x":1218.3,"y":499.1,"s":"Wighamia","p":0.96,"c":0},{"n":"Dutetonimb","x":481.3,"y":644.1,"s":"Noctis","p":0.99,"c":0},{"n":"Rocketon","x":1266.2,"y":668.2,"s":"Wighamia","p":1.46,"c":0},{"n":"Shorough","x":888.3,"y":790.7,"s":"Albrighia","p":6.24,"c":0},{"n":"Frampton","x":428.8,"y":477.0,"s":"Noctis","p":2.16,"c":0},{"n":"Lympsted","x":651.5,"y":664.0,"s":"Noctis","p":11.87,"c":0},{"n":"Gamersbo","x":1226.7,"y":291.0,"s":"Wighamia","p":10.01,"c":0},{"n":"Calton","x":1405.3,"y":512.0,"s":"Wighamia","p":1.54,"c":0},{"n":"Darmouth","x":628.5,"y":613.9,"s":"Noctis","p":2.05,"c":0},{"n":"Redckerton","x":1213.6,"y":454.6,"s":"Wighamia","p":1.63,"c":0},{"n":"Witfordge","x":1130.4,"y":630.1,"s":"Wighamia","p":13.25,"c":0},{"n":"Hinckleigh","x":494.8,"y":481.8,"s":"Noctis","p":0.99,"c":0},{"n":"Staptonta","x":1338.8,"y":692.1,"s":"Wighamia","p":9.07,"c":0},{"n":"Bamney","x":1454,"y":724.3,"s":"Wighamia","p":6.69,"c":0},{"n":"Torkhamp","x":769,"y":444.1,"s":"Elyndor","p":4.43,"c":0},{"n":"Swadingdon","x":1159.3,"y":495.1,"s":"Wighamia","p":1.13,"c":0},{"n":"Altford","x":1358.5,"y":519.0,"s":"Wighamia","p":4.86,"c":0},{"n":"Hatheton","x":562.5,"y":331.8,"s":"Elyndor","p":10.57,"c":0},{"n":"Shifnaltash","x":469.0,"y":598.7,"s":"Noctis","p":18.95,"c":0},{"n":"Sobury","x":369.5,"y":326,"s":"Athi","p":3.23,"c":0},{"n":"Fadingley","x":1211.3,"y":605.3,"s":"Wighamia","p":0.83,"c":0},{"n":"Romberbury","x":1273.3,"y":345.3,"s":"Wighamia","p":0.98,"c":0},{"n":"Blechin","x":448.3,"y":445.2,"s":"Noctis","p":19.92,"c":0},{"n":"Burlingdon","x":1005.7,"y":782.9,"s":"Albrighia","p":11.14,"c":0},{"n":"Atestowbury","x":967.7,"y":500.2,"s":"Noctis","p":5.44,"c":0},{"n":"Cacoriaco","x":571.1,"y":667.3,"s":"Noctis","p":11.41,"c":0},{"n":"Exningle","x":1465.6,"y":576.7,"s":"Wighamia","p":1.29,"c":0},{"n":"Helston","x":1227.9,"y":311.2,"s":"Wighamia","p":4.41,"c":0},{"n":"Eenyadilelle","x":857.7,"y":330.9,"s":"Elyndor","p":0.91,"c":0},{"n":"Castham","x":1331.6,"y":473.0,"s":"Wighamia","p":12.45,"c":0},{"n":"Newbury","x":694.9,"y":674.4,"s":"Noctis","p":6.72,"c":0},{"n":"Chipton","x":1203.3,"y":614.9,"s":"Wighamia","p":1.44,"c":0},{"n":"Pilmenilton","x":801.2,"y":613.6,"s":"Noctis","p":8.21,"c":0},{"n":"Southel","x":1331.5,"y":532.6,"s":"Wighamia","p":2.82,"c":0},{"n":"Balton","x":781.8,"y":607.4,"s":"Noctis","p":1.38,"c":0},{"n":"Balbor","x":702.5,"y":660.1,"s":"Noctis","p":1.64,"c":0},{"n":"Aylesfield","x":1192.0,"y":315.5,"s":"Wighamia","p":1.73,"c":0},{"n":"Craftham","x":562.5,"y":382.2,"s":"Elyndor","p":4.55,"c":0},{"n":"Macheap","x":788.7,"y":660.2,"s":"Noctis","p":3.43,"c":0},{"n":"Marshel","x":767.3,"y":469.0,"s":"Elyndor","p":6.69,"c":0},{"n":"Bivebymock","x":544.2,"y":527.5,"s":"Noctis","p":6.78,"c":0},{"n":"Wartonley","x":625.1,"y":564.7,"s":"Noctis","p":9.36,"c":0},{"n":"Canton","x":909.0,"y":708.2,"s":"Noctis","p":29.8,"c":0},{"n":"Botonton","x":949.9,"y":698.8,"s":"Noctis","p":6.17,"c":0},{"n":"Ananarius","x":1091.1,"y":337.4,"s":"Wighamia","p":10.35,"c":0},{"n":"Nortonton","x":515.2,"y":317.6,"s":"Elyndor","p":11.15,"c":0},{"n":"Rothestoke","x":766.6,"y":476.0,"s":"Elyndor","p":3.47,"c":0},{"n":"Chartonton","x":628.3,"y":468.5,"s":"Elyndor","p":1.62,"c":0},{"n":"Butiarm","x":103.8,"y":111.7,"s":"Athi","p":2.69,"c":0},{"n":"Monwichwark","x":766.7,"y":626.4,"s":"Noctis","p":1.91,"c":0},{"n":"Betforden","x":1469.8,"y":741.0,"s":"Wighamia","p":8.84,"c":0},{"n":"Amelselolon","x":995.0,"y":464.3,"s":"Noctis","p":4.89,"c":0},{"n":"Beterswest","x":563.1,"y":461.1,"s":"Elyndor","p":5.04,"c":0},{"n":"Felseagel","x":893.9,"y":649.8,"s":"Noctis","p":11.58,"c":0},{"n":"Wigley","x":491.8,"y":534.4,"s":"Noctis","p":1.31,"c":0},{"n":"Newborough","x":493.3,"y":404.8,"s":"Noctis","p":1.05,"c":0},{"n":"Miltashton","x":767.1,"y":724.3,"s":"Noctis","p":8.02,"c":0},{"n":"Canbury","x":1249.8,"y":416.8,"s":"Wighamia","p":3.77,"c":0},{"n":"Malbore","x":1510.5,"y":705.6,"s":"Wighamia","p":2.7,"c":0},{"n":"Thatclif","x":1307.3,"y":738.1,"s":"Wighamia","p":5.97,"c":0},{"n":"Congton","x":745.3,"y":740.0,"s":"Noctis","p":3.65,"c":0},{"n":"Stotfieldge","x":1359.1,"y":626.4,"s":"Wighamia","p":7.19,"c":0},{"n":"Drior","x":383.9,"y":164.8,"s":"Athi","p":13.79,"c":0},{"n":"Sorough","x":740.3,"y":778.8,"s":"Noctis","p":1.59,"c":0},{"n":"Glernaahx","x":345.4,"y":177,"s":"Athi","p":0.97,"c":0},{"n":"Bretford","x":801,"y":466.3,"s":"Elyndor","p":1.32,"c":0},{"n":"Hertherby","x":879.7,"y":638.8,"s":"Noctis","p":2.25,"c":0},{"n":"Wathersto","x":740.5,"y":756.5,"s":"Noctis","p":3.81,"c":0},{"n":"Shifract","x":1229.5,"y":327.1,"s":"Wighamia","p":1.85,"c":0},{"n":"Cocheapsea","x":779.6,"y":621.7,"s":"Noctis","p":7.91,"c":0},{"n":"Baling","x":1150.1,"y":446.1,"s":"Wighamia","p":8.66,"c":0},{"n":"Bagelne","x":1408.2,"y":604.8,"s":"Wighamia","p":12.4,"c":0},{"n":"Atfordmanch","x":824.2,"y":447.6,"s":"Elyndor","p":18.83,"c":0},{"n":"Clifractle","x":769.3,"y":749.4,"s":"Noctis","p":8.54,"c":0},{"n":"Albridling","x":409.7,"y":507.2,"s":"Noctis","p":9.93,"c":0},{"n":"Thaxningdon","x":776.0,"y":703.6,"s":"Noctis","p":1.25,"c":0},{"n":"Chawbig","x":1323.5,"y":734.9,"s":"Wighamia","p":13.11,"c":0},{"n":"Osterbury","x":903.5,"y":828.6,"s":"Albrighia","p":1.43,"c":0},{"n":"Hatnesfield","x":358.5,"y":341.5,"s":"Athi","p":7.96,"c":0},{"n":"Roclester","x":966.7,"y":481.2,"s":"Noctis","p":2.42,"c":0},{"n":"Gramney","x":918.9,"y":665.5,"s":"Noctis","p":3.58,"c":0},{"n":"Godlelis","x":982.8,"y":627.0,"s":"Noctis","p":1.02,"c":0},{"n":"Stotfieldbu","x":1110.6,"y":630.1,"s":"Wighamia","p":7.96,"c":0},{"n":"Uxbrid","x":1248.7,"y":564.1,"s":"Wighamia","p":1.77,"c":0},{"n":"Whitry","x":1063.4,"y":774.8,"s":"Albrighia","p":5.77,"c":0},{"n":"Gneabgar","x":274.7,"y":141.5,"s":"Athi","p":10.12,"c":0},{"n":"Charford","x":702.9,"y":574.9,"s":"Noctis","p":6.39,"c":0},{"n":"Thatcheap","x":1309.4,"y":742.2,"s":"Wighamia","p":0.88,"c":0},{"n":"Linseyfield","x":802.0,"y":662.4,"s":"Noctis","p":18.42,"c":0},{"n":"Hatescast","x":807.7,"y":542.4,"s":"Noctis","p":26.27,"c":0},{"n":"Corium","x":565.9,"y":668.8,"s":"Noctis","p":2.28,"c":0},{"n":"Watchindon","x":466.4,"y":549.2,"s":"Noctis","p":13.2,"c":0},{"n":"Portsbury","x":520.9,"y":580.4,"s":"Noctis","p":4.77,"c":0},{"n":"Saltash","x":783.9,"y":548.3,"s":"Noctis","p":4.91,"c":0},{"n":"Chawbigle","x":1459.0,"y":643.9,"s":"Wighamia","p":0.99,"c":0},{"n":"Ventiarea","x":506.8,"y":667.5,"s":"Noctis","p":3.79,"c":0},{"n":"Crewester","x":1181.5,"y":507.5,"s":"Wighamia","p":6.48,"c":0},{"n":"Castford","x":583.5,"y":604.0,"s":"Noctis","p":1.1,"c":0},{"n":"Bunarukthad","x":1485.7,"y":789.3,"s":"Wighamia","p":2.41,"c":0},{"n":"Ormsbutonta","x":685.2,"y":504.3,"s":"Elyndor","p":1.32,"c":0},{"n":"Linton","x":1070.0,"y":804.2,"s":"Albrighia","p":9.9,"c":0},{"n":"Gararenbeck","x":893.3,"y":483.3,"s":"Noctis","p":1.68,"c":0},{"n":"Rethes","x":1077.9,"y":339.2,"s":"Wighamia","p":7.82,"c":0},{"n":"Towleigh","x":415.7,"y":341.4,"s":"Athi","p":10.88,"c":0},{"n":"Aplewent","x":1234.0,"y":212.1,"s":"Wighamia","p":3.98,"c":0},{"n":"Cambrigh","x":833.1,"y":705.1,"s":"Noctis","p":4.7,"c":0},{"n":"Rothwark","x":1471.8,"y":701.0,"s":"Wighamia","p":2.93,"c":0},{"n":"Axbrid","x":386.1,"y":331.7,"s":"Athi","p":4.8,"c":0},{"n":"Macham","x":799.5,"y":471.9,"s":"Elyndor","p":2.08,"c":0},{"n":"Lympsterton","x":500.8,"y":343.5,"s":"Elyndor","p":3.05,"c":0},{"n":"Cleover","x":440.1,"y":594,"s":"Noctis","p":10.03,"c":0},{"n":"Esaputolodu","x":449.4,"y":638.9,"s":"Noctis","p":1.56,"c":0},{"n":"Seabingham","x":535.2,"y":622.8,"s":"Noctis","p":2.22,"c":0},{"n":"Clitford","x":870.2,"y":592.8,"s":"Noctis","p":0.95,"c":0},{"n":"Cambrid","x":802.9,"y":608.2,"s":"Noctis","p":2.29,"c":0},{"n":"Tarnorum","x":503.6,"y":693.3,"s":"Noctis","p":1.22,"c":0},{"n":"Thaxning","x":684.8,"y":619.8,"s":"Noctis","p":5.91,"c":0},{"n":"Castfield","x":814.0,"y":667.7,"s":"Noctis","p":14.66,"c":0},{"n":"Frampton","x":700.0,"y":697.4,"s":"Noctis","p":2.26,"c":0},{"n":"Soroughbou","x":465.0,"y":378.4,"s":"Noctis","p":4.41,"c":0},{"n":"Causfield","x":1348.8,"y":646.2,"s":"Wighamia","p":6.38,"c":0},{"n":"Soutford","x":1478.8,"y":577.7,"s":"Wighamia","p":10.88,"c":0},{"n":"Witford","x":513.6,"y":605.6,"s":"Noctis","p":7.24,"c":0},{"n":"Berton","x":860.6,"y":362.9,"s":"Elyndor","p":5.13,"c":0},{"n":"Parculum","x":517.9,"y":717.4,"s":"Noctis","p":9.85,"c":0},{"n":"Wishoney","x":797.3,"y":450.9,"s":"Elyndor","p":8.69,"c":0},{"n":"Syl-Shona","x":1104.0,"y":320.6,"s":"Wighamia","p":1.34,"c":0},{"n":"Ormsbury","x":363.0,"y":356.1,"s":"Athi","p":10.26,"c":0},{"n":"Scaguva","x":538.4,"y":657.8,"s":"Noctis","p":8.26,"c":0},{"n":"Arester","x":1059.9,"y":820.9,"s":"Albrighia","p":0.94,"c":0},{"n":"Stanstore","x":575.5,"y":596.6,"s":"Noctis","p":7.93,"c":0},{"n":"Berham","x":783.8,"y":432.9,"s":"Elyndor","p":1.21,"c":0},{"n":"Hinckburgh","x":502.3,"y":281.9,"s":"Elyndor","p":0.93,"c":0},{"n":"Noscasther","x":1038.6,"y":663.6,"s":"Noctis","p":0.72,"c":0},{"n":"Tutheho","x":445.7,"y":448.4,"s":"Noctis","p":12.87,"c":0},{"n":"Swaveven","x":1434.2,"y":669,"s":"Wighamia","p":9.6,"c":0},{"n":"Vespera","x":504.3,"y":330.2,"s":"Elyndor","p":13.34,"c":0},{"n":"Yeoroughes","x":491.5,"y":320.1,"s":"Elyndor","p":6.82,"c":0},{"n":"Newbuton","x":778.3,"y":732.9,"s":"Noctis","p":12.76,"c":0},{"n":"Mithomerley","x":1127.5,"y":620.0,"s":"Wighamia","p":13.62,"c":0},{"n":"Corough","x":519.1,"y":628.3,"s":"Noctis","p":1.03,"c":0},{"n":"Newbigdon","x":1307.6,"y":558.1,"s":"Wighamia","p":6.68,"c":0},{"n":"Exning","x":792.9,"y":712.9,"s":"Noctis","p":1.43,"c":0},{"n":"Bucliford","x":581.3,"y":467.6,"s":"Elyndor","p":2.83,"c":0},{"n":"Castle","x":1142.6,"y":541.7,"s":"Wighamia","p":4.01,"c":0},{"n":"Cleorough","x":710.2,"y":582.2,"s":"Noctis","p":11.76,"c":0},{"n":"Giledzigzig","x":1566.9,"y":783.2,"s":"Wighamia","p":2.73,"c":0},{"n":"Malworth","x":1352.8,"y":471.7,"s":"Wighamia","p":0.95,"c":0},{"n":"Allensiso","x":507.4,"y":710.3,"s":"Noctis","p":4.81,"c":0},{"n":"Hatfordley","x":551.8,"y":564.5,"s":"Noctis","p":1.1,"c":0},{"n":"Knacury","x":707.5,"y":441.6,"s":"Elyndor","p":9.73,"c":0},{"n":"Skipton","x":920.8,"y":488.6,"s":"Noctis","p":11.96,"c":0},{"n":"Horscom","x":1161.6,"y":320.3,"s":"Wighamia","p":1.53,"c":0},{"n":"Berhambedi","x":875.3,"y":735.1,"s":"Noctis","p":1.55,"c":0},{"n":"Cockerton","x":559.7,"y":563.5,"s":"Noctis","p":4.32,"c":0},{"n":"Meth'jinas","x":38.4,"y":115.7,"s":"Athi","p":12.31,"c":0},{"n":"Horstone","x":813.5,"y":782.7,"s":"Noctis","p":8.41,"c":0},{"n":"Dunsterden","x":536.6,"y":406.3,"s":"Noctis","p":2.68,"c":0},{"n":"Cockeham","x":1406.7,"y":501.5,"s":"Wighamia","p":5.02,"c":0},{"n":"Malworth","x":444.8,"y":500.7,"s":"Noctis","p":3.79,"c":0},{"n":"Retford","x":1486.4,"y":719.5,"s":"Wighamia","p":13.17,"c":0},{"n":"Henbury","x":868.9,"y":430.4,"s":"Noctis","p":3.35,"c":0},{"n":"Phig","x":395.2,"y":117.0,"s":"Neutrals","p":6.7,"c":0},{"n":"Bavediton","x":493.3,"y":593.9,"s":"Noctis","p":14.33,"c":0},{"n":"Euguba","x":552.8,"y":688.1,"s":"Noctis","p":6.5,"c":0},{"n":"Launrith","x":1278.4,"y":378.7,"s":"Wighamia","p":8.23,"c":0},{"n":"Allentia","x":546.5,"y":662.9,"s":"Noctis","p":23.33,"c":0},{"n":"Portsfield","x":595.5,"y":568.8,"s":"Noctis","p":4.71,"c":0},{"n":"Rothesbute","x":969.0,"y":776.9,"s":"Albrighia","p":1.21,"c":0},{"n":"Standenbeck","x":855.7,"y":432.0,"s":"Elyndor","p":5.16,"c":0},{"n":"Stansterton","x":908.6,"y":605.9,"s":"Noctis","p":6.68,"c":0},{"n":"Sobute","x":1278.8,"y":550.1,"s":"Wighamia","p":7.82,"c":0},{"n":"Shersterham","x":1461.7,"y":606.4,"s":"Wighamia","p":3.16,"c":0},{"n":"Clitle","x":963.2,"y":740.1,"s":"Albrighia","p":6.21,"c":0},{"n":"Creholeham","x":1246.6,"y":325.9,"s":"Wighamia","p":12.32,"c":0},{"n":"Ullmanase","x":1107.7,"y":472.9,"s":"Noctis","p":1.19,"c":0},{"n":"Causford","x":539.2,"y":523.2,"s":"Noctis","p":8.39,"c":0},{"n":"Chawceston","x":1168.0,"y":614.4,"s":"Wighamia","p":8.99,"c":0},{"n":"Swaxai","x":7.9,"y":103.0,"s":"Athi","p":0.61,"c":0},{"n":"Rochampound","x":1346.9,"y":807.2,"s":"Wighamia","p":1.05,"c":0},{"n":"Hertbury","x":740.0,"y":710.1,"s":"Noctis","p":1.05,"c":0},{"n":"Foviling","x":1397.1,"y":576.6,"s":"Wighamia","p":1.69,"c":0},{"n":"Torknethes","x":884.1,"y":606.7,"s":"Noctis","p":7.51,"c":0},{"n":"Al-Shoranor","x":963.4,"y":334.0,"s":"Elyndor","p":3.84,"c":0},{"n":"Sobury","x":659.5,"y":442.5,"s":"Elyndor","p":1.29,"c":0},{"n":"Soleby","x":852.7,"y":354.8,"s":"Elyndor","p":3.25,"c":0},{"n":"Kilkburgh","x":1258.3,"y":416.7,"s":"Wighamia","p":5.71,"c":0},{"n":"Winknethin","x":549.2,"y":532.4,"s":"Noctis","p":12.27,"c":0},{"n":"Contialorum","x":506.4,"y":673.9,"s":"Noctis","p":9.55,"c":0},{"n":"Kilkburgh","x":343.9,"y":303.5,"s":"Athi","p":1.49,"c":0},{"n":"Sidgeroelis","x":1336.1,"y":613.4,"s":"Wighamia","p":19.23,"c":0},{"n":"Winkwar","x":833.9,"y":571.4,"s":"Noctis","p":5.46,"c":0},{"n":"Horny","x":1076.5,"y":645.6,"s":"Noctis","p":1.2,"c":0},{"n":"Milworth","x":607.4,"y":608.0,"s":"Noctis","p":6.44,"c":0},{"n":"Wickburgh","x":1204.4,"y":675.7,"s":"Wighamia","p":0.94,"c":0},{"n":"Nostedle","x":795.7,"y":699.4,"s":"Noctis","p":9.22,"c":0},{"n":"Atherton","x":784.0,"y":405.7,"s":"Elyndor","p":1.74,"c":0},{"n":"Gumunz","x":1424.4,"y":815.9,"s":"Wighamia","p":12.14,"c":0},{"n":"Thetbury","x":786,"y":790.4,"s":"Noctis","p":9.16,"c":0},{"n":"Godenmouth","x":992.2,"y":793.2,"s":"Albrighia","p":2.52,"c":0},{"n":"Grantbury","x":473.9,"y":387.9,"s":"Noctis","p":1.18,"c":0},{"n":"Penkburgh","x":916.5,"y":538.7,"s":"Noctis","p":3.35,"c":0},{"n":"Chiston","x":632.0,"y":576.8,"s":"Noctis","p":1.13,"c":0},{"n":"Haytestore","x":1590.5,"y":628.3,"s":"Wighamia","p":0.63,"c":0},{"n":"Eemyuer","x":870.8,"y":294.8,"s":"Elyndor","p":2.74,"c":0},{"n":"Westcking","x":469.1,"y":575.4,"s":"Noctis","p":7.17,"c":0},{"n":"Tintefract","x":1531.1,"y":694.4,"s":"Wighamia","p":7.64,"c":0},{"n":"Bosterham","x":1056.8,"y":808.3,"s":"Albrighia","p":19.27,"c":0},{"n":"Rurgiss","x":216.4,"y":335.6,"s":"Athi","p":2.37,"c":0},{"n":"Kinterbot","x":1395.6,"y":493.3,"s":"Wighamia","p":1.01,"c":0},{"n":"Osbury","x":1388.4,"y":653.6,"s":"Wighamia","p":4.77,"c":0},{"n":"Sheosearion","x":1082.1,"y":476.2,"s":"Noctis","p":2.92,"c":0},{"n":"Guildley","x":766.0,"y":503.3,"s":"Elyndor","p":8.29,"c":0},{"n":"Balbolide","x":814.0,"y":788.6,"s":"Noctis","p":1.08,"c":0},{"n":"Westcker","x":1232.4,"y":549.9,"s":"Wighamia","p":1.01,"c":0},{"n":"Apton","x":483.1,"y":524.7,"s":"Noctis","p":6.61,"c":0},{"n":"Burmouthbu","x":530.0,"y":559.0,"s":"Noctis","p":2.55,"c":0},{"n":"Seaford","x":667.4,"y":626.2,"s":"Noctis","p":5.86,"c":0},{"n":"Holton","x":1440.3,"y":592.9,"s":"Wighamia","p":5.4,"c":0},{"n":"Cleorough","x":879.9,"y":521.2,"s":"Noctis","p":5.47,"c":0},{"n":"Skalzi","x":170.0,"y":319.1,"s":"Athi","p":1.51,"c":0},{"n":"Watbury","x":570.8,"y":385.2,"s":"Elyndor","p":9.97,"c":0},{"n":"Redcheaple","x":1505.5,"y":557.4,"s":"Wighamia","p":5.93,"c":0},{"n":"Lugrandina","x":547.2,"y":656.0,"s":"Noctis","p":8.43,"c":0},{"n":"Seacumere","x":798.3,"y":480.8,"s":"Elyndor","p":13.76,"c":1},{"n":"Birbury","x":614.8,"y":525.5,"s":"Noctis","p":2.6,"c":0},{"n":"Piltashton","x":1445.9,"y":606.9,"s":"Wighamia","p":6.97,"c":0},{"n":"Borough","x":1005.7,"y":748.5,"s":"Albrighia","p":1.7,"c":0},{"n":"Fll'fenes","x":235.3,"y":120.3,"s":"Athi","p":1.16,"c":0},{"n":"Dunston","x":942.4,"y":743.1,"s":"Noctis","p":3.05,"c":0},{"n":"Perstowbig","x":955.1,"y":729.5,"s":"Albrighia","p":6.48,"c":0},{"n":"Uxbrid","x":1271.4,"y":471.5,"s":"Wighamia","p":6.16,"c":0},{"n":"Treliskirk","x":1204.9,"y":644.8,"s":"Wighamia","p":0.96,"c":0},{"n":"Cambrid","x":510.5,"y":428.8,"s":"Noctis","p":8.72,"c":0},{"n":"Merton","x":545.3,"y":420.1,"s":"Noctis","p":1.29,"c":0},{"n":"Darming","x":1289.2,"y":594.1,"s":"Wighamia","p":2.38,"c":0},{"n":"Chistonton","x":853.8,"y":650.3,"s":"Noctis","p":2.78,"c":0},{"n":"Dalterlis","x":1359.5,"y":521,"s":"Wighamia","p":4.13,"c":0},{"n":"Whitham","x":1234.9,"y":559.8,"s":"Wighamia","p":3.69,"c":0},{"n":"Nosmouth","x":1327.4,"y":765.9,"s":"Wighamia","p":3.42,"c":0},{"n":"Elindraklas","x":313.2,"y":133.3,"s":"Neutrals","p":9.66,"c":0},{"n":"Prean","x":265.4,"y":294.5,"s":"Athi","p":1.54,"c":0},{"n":"Skipsea","x":1295.0,"y":499.8,"s":"Wighamia","p":2.05,"c":0},{"n":"Whitforden","x":916.3,"y":791.7,"s":"Albrighia","p":8.29,"c":0},{"n":"Abingin","x":780.1,"y":690.0,"s":"Noctis","p":9.94,"c":0},{"n":"Wadewiches","x":781.5,"y":713.0,"s":"Noctis","p":4.04,"c":0},{"n":"Khundusharb","x":1557.1,"y":766.5,"s":"Wighamia","p":4.74,"c":0},{"n":"Sshaumenor","x":1073.0,"y":245.6,"s":"Wighamia","p":2.69,"c":0},{"n":"Malney","x":822.0,"y":684.2,"s":"Noctis","p":1.85,"c":0},{"n":"Westcheaple","x":1534.7,"y":656.8,"s":"Wighamia","p":6.86,"c":0},{"n":"Cambriden","x":990.2,"y":644.2,"s":"Noctis","p":1.54,"c":0},{"n":"Midgere","x":1488.8,"y":695.4,"s":"Wighamia","p":2.27,"c":0},{"n":"Stapleley","x":452.9,"y":621.5,"s":"Noctis","p":8.9,"c":0},{"n":"Westre","x":1298.5,"y":697,"s":"Wighamia","p":7.43,"c":0},{"n":"Uzandin","x":1526.8,"y":755.5,"s":"Wighamia","p":4.19,"c":0},{"n":"Ketonta","x":1205.9,"y":550.6,"s":"Wighamia","p":1.56,"c":0},{"n":"Wateskirk","x":953.9,"y":682.8,"s":"Noctis","p":14.57,"c":0},{"n":"Wargle","x":1566.0,"y":602.5,"s":"Wighamia","p":14.45,"c":0},{"n":"Kingtondal","x":580.5,"y":558.7,"s":"Noctis","p":8.27,"c":0},{"n":"Wargton","x":1301.1,"y":534.3,"s":"Wighamia","p":4.18,"c":0},{"n":"Blechelnema","x":1271.8,"y":579.6,"s":"Wighamia","p":1.31,"c":0},{"n":"Yeoleton","x":1259.9,"y":479.2,"s":"Wighamia","p":2.83,"c":0},{"n":"Saltonterke","x":970.8,"y":726.3,"s":"Albrighia","p":4.79,"c":0},{"n":"Westhe","x":765.1,"y":430.1,"s":"Elyndor","p":8.83,"c":0},{"n":"Warbury","x":1286.8,"y":759.7,"s":"Wighamia","p":0.95,"c":0},{"n":"Mapja","x":178.3,"y":307.8,"s":"Athi","p":5.63,"c":0},{"n":"Cartonby","x":1386.4,"y":491.2,"s":"Wighamia","p":1.83,"c":0},{"n":"Lusenteto","x":450.8,"y":667.0,"s":"Noctis","p":1.7,"c":0},{"n":"Tuthambe","x":950.3,"y":718.6,"s":"Noctis","p":1.76,"c":0},{"n":"Shersfield","x":265.1,"y":321.4,"s":"Athi","p":5.97,"c":0},{"n":"Hertford","x":836.4,"y":359.3,"s":"Elyndor","p":9.56,"c":0},{"n":"Mermouth","x":734.3,"y":697.1,"s":"Noctis","p":1.17,"c":0},{"n":"Uzjun'tiss","x":267.9,"y":382.6,"s":"Athi","p":3.52,"c":0},{"n":"Clifnalme","x":1287.5,"y":768.7,"s":"Wighamia","p":16.39,"c":0},{"n":"Beringrara","x":882.6,"y":824.3,"s":"Albrighia","p":6.48,"c":0},{"n":"Bruton","x":1489.2,"y":639.3,"s":"Wighamia","p":4.58,"c":0},{"n":"Northingham","x":627.7,"y":414.6,"s":"Elyndor","p":0.97,"c":0},{"n":"Gob","x":296.6,"y":305.7,"s":"Athi","p":3.79,"c":0},{"n":"Aurigulacum","x":587.0,"y":668.2,"s":"Noctis","p":19.78,"c":0},{"n":"Clifractnes","x":1231.3,"y":595.2,"s":"Wighamia","p":2.81,"c":0},{"n":"Kedondo","x":1493.0,"y":652.3,"s":"Wighamia","p":19.62,"c":0},{"n":"Dalboleston","x":806.6,"y":788.9,"s":"Noctis","p":8.08,"c":0},{"n":"Tutoningt","x":1561.4,"y":557.3,"s":"Wighamia","p":1.97,"c":0},{"n":"Wigham","x":806.8,"y":466.5,"s":"Elyndor","p":8.77,"c":0},{"n":"Iupicum","x":449.2,"y":662.4,"s":"Noctis","p":1.59,"c":0},{"n":"Staple","x":592.2,"y":621.2,"s":"Noctis","p":3.72,"c":0},{"n":"Bucker","x":925.0,"y":746.8,"s":"Noctis","p":9.95,"c":0},{"n":"Oakleyles","x":1256.8,"y":593.4,"s":"Wighamia","p":6.3,"c":0},{"n":"Afdolosa","x":962.5,"y":255.2,"s":"Elyndor","p":7.94,"c":0},{"n":"Wigley","x":938.1,"y":672.5,"s":"Noctis","p":21.47,"c":0},{"n":"Sorough","x":990.5,"y":660.0,"s":"Noctis","p":16.01,"c":0},{"n":"Sudgelis","x":973.7,"y":708.3,"s":"Noctis","p":5.12,"c":0},{"n":"Bundibirukt","x":1569.9,"y":811.7,"s":"Wighamia","p":9.16,"c":0},{"n":"Uxbrid","x":1552.2,"y":563.6,"s":"Wighamia","p":7.63,"c":0},{"n":"Louthleach","x":434.8,"y":549.5,"s":"Noctis","p":6.56,"c":0},{"n":"Soledine","x":1046.1,"y":645.8,"s":"Noctis","p":8.93,"c":0},{"n":"Westneshore","x":622.5,"y":594.7,"s":"Noctis","p":1.71,"c":0},{"n":"Seboviaqugu","x":476.9,"y":677.7,"s":"Noctis","p":14.53,"c":0},{"n":"Tasingsford","x":953.8,"y":641.9,"s":"Noctis","p":1.64,"c":0},{"n":"Sidmanch","x":371.1,"y":398.2,"s":"Athi","p":5.94,"c":0},{"n":"Hather","x":472.1,"y":608.7,"s":"Noctis","p":9.33,"c":0},{"n":"Chichetford","x":683.2,"y":685.3,"s":"Noctis","p":2.28,"c":0},{"n":"Orwickburgh","x":1003.6,"y":824.0,"s":"Albrighia","p":3.36,"c":0},{"n":"Newbokeham","x":314.7,"y":345.7,"s":"Athi","p":0.92,"c":0},{"n":"Lympskirk","x":911.0,"y":560.3,"s":"Noctis","p":1.07,"c":0},{"n":"Walmondge","x":1223.9,"y":297.9,"s":"Wighamia","p":6.56,"c":0},{"n":"Skipton","x":611.5,"y":561.1,"s":"Noctis","p":2.25,"c":0},{"n":"Sshandelelt","x":1096.1,"y":350.5,"s":"Wighamia","p":13.08,"c":0},{"n":"Hertford","x":668.5,"y":657.2,"s":"Noctis","p":12.65,"c":0},{"n":"Sheolon","x":1098.5,"y":325.8,"s":"Wighamia","p":1.5,"c":0},{"n":"Slojeshras","x":176.2,"y":330.4,"s":"Athi","p":1.47,"c":0},{"n":"Dulavagurum","x":525.2,"y":660.8,"s":"Noctis","p":3.85,"c":0},{"n":"Pilworthbou","x":1275.8,"y":685.2,"s":"Wighamia","p":1.8,"c":0},{"n":"Nituk","x":190.0,"y":331.7,"s":"Athi","p":1.33,"c":0},{"n":"Fidedigan","x":786.8,"y":632.2,"s":"Noctis","p":12.56,"c":0},{"n":"Cliftonrith","x":1115.5,"y":766.6,"s":"Albrighia","p":4.57,"c":0},{"n":"Axbrigh","x":1289.6,"y":504.1,"s":"Wighamia","p":4.06,"c":0},{"n":"Kirmouth","x":475.5,"y":633.3,"s":"Noctis","p":2.42,"c":0},{"n":"Bilbabumun","x":1431.6,"y":782.5,"s":"Wighamia","p":8.91,"c":0},{"n":"Ormston","x":756.0,"y":642.0,"s":"Noctis","p":5.95,"c":0},{"n":"Botham","x":909.8,"y":442.4,"s":"Noctis","p":14.32,"c":0},{"n":"Altreter","x":653.1,"y":613.8,"s":"Noctis","p":8.53,"c":0},{"n":"Lympston","x":803.6,"y":740.0,"s":"Noctis","p":1.07,"c":0},{"n":"Brokenil","x":557,"y":578.7,"s":"Noctis","p":2.25,"c":0},{"n":"Burakzir","x":1581.2,"y":798.6,"s":"Wighamia","p":6.88,"c":0},{"n":"Sokewent","x":1389.8,"y":605.4,"s":"Wighamia","p":7.43,"c":0},{"n":"Thorndonsey","x":1002.4,"y":692,"s":"Noctis","p":12.17,"c":0},{"n":"Exedihulbo","x":370.6,"y":347.3,"s":"Athi","p":5.38,"c":0},{"n":"Apingham","x":1229.2,"y":378.6,"s":"Wighamia","p":5.79,"c":0},{"n":"Malney","x":702.0,"y":558.3,"s":"Noctis","p":1.03,"c":0},{"n":"Salingdon","x":1327.3,"y":478.9,"s":"Wighamia","p":2.08,"c":0},{"n":"Kirlingdon","x":1477.1,"y":722.0,"s":"Wighamia","p":16.13,"c":0},{"n":"Preswestnes","x":563.5,"y":397.1,"s":"Elyndor","p":14.91,"c":0},{"n":"Arilanonia","x":477.6,"y":659.4,"s":"Noctis","p":1.78,"c":0},{"n":"Agelton","x":1167.2,"y":671.0,"s":"Wighamia","p":15.1,"c":0},{"n":"Teteston","x":1274.9,"y":800.4,"s":"Wighamia","p":2.72,"c":0},{"n":"Mitley","x":800.6,"y":343.2,"s":"Elyndor","p":1.47,"c":0},{"n":"Newleigh","x":314.1,"y":316.8,"s":"Athi","p":8.25,"c":0},{"n":"Wadingrale","x":824.3,"y":634.6,"s":"Noctis","p":2.06,"c":0},{"n":"Skiping","x":389.7,"y":395.8,"s":"Athi","p":11.3,"c":0},{"n":"Portsted","x":1250.5,"y":551.8,"s":"Wighamia","p":5.11,"c":0},{"n":"Kyathle","x":1056.8,"y":470.1,"s":"Noctis","p":1.07,"c":0},{"n":"Knateston","x":455.8,"y":584.8,"s":"Noctis","p":13.49,"c":0},{"n":"Brorough","x":761.3,"y":736.2,"s":"Noctis","p":6.64,"c":0},{"n":"Holbor","x":822.0,"y":579.5,"s":"Noctis","p":3.31,"c":0},{"n":"Axbrid","x":1482.6,"y":587.7,"s":"Wighamia","p":5.05,"c":0},{"n":"Stotry","x":742.2,"y":689.2,"s":"Noctis","p":8.94,"c":0},{"n":"Burmouthes","x":364.6,"y":297.7,"s":"Athi","p":3.55,"c":0},{"n":"Marduliob","x":559.1,"y":675.2,"s":"Noctis","p":7.46,"c":0},{"n":"Seaton","x":1465,"y":687.1,"s":"Wighamia","p":2.47,"c":0},{"n":"Knutsdon","x":862.1,"y":717.0,"s":"Noctis","p":6.42,"c":0},{"n":"Congford","x":856.1,"y":607.6,"s":"Noctis","p":6.3,"c":0},{"n":"Granthore","x":660.9,"y":581.0,"s":"Noctis","p":4.15,"c":0},{"n":"Innssin","x":1060.0,"y":493.5,"s":"Noctis","p":3.15,"c":0},{"n":"Gatford","x":898.0,"y":625.1,"s":"Noctis","p":7.09,"c":0},{"n":"Cymarion","x":1072.0,"y":263.1,"s":"Wighamia","p":0.77,"c":0},{"n":"Salton","x":534.5,"y":486.1,"s":"Noctis","p":2.91,"c":0},{"n":"Norlowbover","x":555.7,"y":609.6,"s":"Noctis","p":5.52,"c":0},{"n":"Cleovil","x":902.3,"y":782.1,"s":"Albrighia","p":1.99,"c":0},{"n":"Shoney","x":1233.9,"y":603.2,"s":"Wighamia","p":4.88,"c":0},{"n":"Brascom","x":788.0,"y":425.8,"s":"Elyndor","p":15.1,"c":0},{"n":"Bingley","x":858.5,"y":380.6,"s":"Elyndor","p":0.92,"c":0},{"n":"Redckingley","x":685.7,"y":734.1,"s":"Noctis","p":2.48,"c":0},{"n":"Witham","x":539.2,"y":597.3,"s":"Noctis","p":9.9,"c":0},{"n":"Witford","x":876.3,"y":605.7,"s":"Noctis","p":7.93,"c":0},{"n":"Clitnestab","x":779.5,"y":477.5,"s":"Elyndor","p":12.64,"c":0},{"n":"Wargdonton","x":1078.0,"y":826.0,"s":"Albrighia","p":15.36,"c":0},{"n":"Castle","x":1256.4,"y":819.4,"s":"Wighamia","p":7.96,"c":0},{"n":"Quatrydon","x":1013.0,"y":738.4,"s":"Albrighia","p":2.08,"c":0},{"n":"Dretheashal","x":925.9,"y":291.2,"s":"Elyndor","p":5.42,"c":0},{"n":"Bunbydonden","x":1243.4,"y":476.6,"s":"Wighamia","p":1.74,"c":0},{"n":"Haveton","x":900.3,"y":791.3,"s":"Albrighia","p":1.35,"c":0},{"n":"Retesdon","x":1237.8,"y":269.4,"s":"Wighamia","p":1.46,"c":0},{"n":"Caustobury","x":1343.7,"y":736.3,"s":"Wighamia","p":2.78,"c":0},{"n":"Wister","x":856.4,"y":616.3,"s":"Noctis","p":2.26,"c":0},{"n":"Treton","x":371.2,"y":307.6,"s":"Athi","p":5.33,"c":0},{"n":"Watley","x":384.2,"y":325.1,"s":"Athi","p":8.16,"c":0},{"n":"Oakleigh","x":1035.8,"y":762.9,"s":"Albrighia","p":1.11,"c":0},{"n":"Hatford","x":1146.0,"y":799.5,"s":"Albrighia","p":0.92,"c":0},{"n":"Modmanch","x":1301.0,"y":759.2,"s":"Wighamia","p":12.11,"c":0},{"n":"Wihul","x":794.1,"y":448.1,"s":"Elyndor","p":7.69,"c":0},{"n":"Pildock","x":583.9,"y":361.6,"s":"Elyndor","p":1.33,"c":0},{"n":"Congdonbeck","x":851.5,"y":437.5,"s":"Elyndor","p":11.97,"c":0},{"n":"Norwickham","x":885.8,"y":736.4,"s":"Noctis","p":0.93,"c":0},{"n":"Atholive","x":1175.0,"y":544.1,"s":"Wighamia","p":13.86,"c":0},{"n":"Tutford","x":1301.0,"y":787.9,"s":"Wighamia","p":1.04,"c":0},{"n":"Glam","x":389.9,"y":202.4,"s":"Athi","p":3.72,"c":0},{"n":"Pemalisbury","x":1352.6,"y":699.5,"s":"Wighamia","p":7.36,"c":0},{"n":"Ymkaleanlon","x":987.2,"y":391.7,"s":"Noctis","p":3.61,"c":0},{"n":"Kingmoneroe","x":440.4,"y":545.2,"s":"Noctis","p":0.97,"c":0},{"n":"Knutscast","x":908.4,"y":405.9,"s":"Noctis","p":6.14,"c":0},{"n":"Sading","x":1022.6,"y":645.0,"s":"Noctis","p":4.18,"c":0},{"n":"Sherster","x":1251.6,"y":443.9,"s":"Wighamia","p":9.47,"c":0},{"n":"Stanstabro","x":1196.5,"y":627.9,"s":"Wighamia","p":3.81,"c":0},{"n":"Thetrenil","x":1089.1,"y":805,"s":"Albrighia","p":11.14,"c":0},{"n":"Borewent","x":338.2,"y":427.1,"s":"Athi","p":4.48,"c":0},{"n":"Lumexedon","x":940.4,"y":645.4,"s":"Noctis","p":6.36,"c":0},{"n":"Kencewesdon","x":1285.2,"y":657.9,"s":"Wighamia","p":2.07,"c":0},{"n":"Chiple","x":948,"y":573.5,"s":"Noctis","p":4.06,"c":0},{"n":"Crewich","x":333.8,"y":432.5,"s":"Athi","p":8.14,"c":0},{"n":"Northboury","x":1181.1,"y":633.9,"s":"Wighamia","p":14.39,"c":0},{"n":"Skugash","x":165.9,"y":304.1,"s":"Athi","p":1.79,"c":0},{"n":"Southambe","x":871.9,"y":697.6,"s":"Noctis","p":1.28,"c":0},{"n":"Dunskirk","x":663.6,"y":568.9,"s":"Noctis","p":1.16,"c":0},{"n":"Ostobury","x":726.4,"y":770.4,"s":"Noctis","p":5.53,"c":0},{"n":"Shemrion","x":1107.2,"y":271.2,"s":"Wighamia","p":1.0,"c":0},{"n":"Enyari","x":846.0,"y":295.4,"s":"Elyndor","p":5.24,"c":0},{"n":"Pullexum","x":475.8,"y":699.0,"s":"Noctis","p":8.9,"c":0},{"n":"Shorough","x":525.8,"y":598.0,"s":"Noctis","p":1.12,"c":0},{"n":"Newbuserid","x":1379.2,"y":562.0,"s":"Wighamia","p":12.87,"c":0},{"n":"Keford","x":332.8,"y":315.9,"s":"Athi","p":18.19,"c":0},{"n":"Westclif","x":1022.3,"y":749.1,"s":"Albrighia","p":16.56,"c":0},{"n":"Swasingsham","x":642.1,"y":445.2,"s":"Elyndor","p":1.65,"c":0},{"n":"Witbury","x":574.6,"y":394.8,"s":"Elyndor","p":3.69,"c":0},{"n":"Gafdobeth","x":1132.7,"y":499.3,"s":"Wighamia","p":0.99,"c":0},{"n":"Watham","x":405.1,"y":516,"s":"Noctis","p":10.81,"c":0},{"n":"Watcham","x":360.1,"y":321.5,"s":"Athi","p":2.11,"c":0},{"n":"Naba","x":1466.1,"y":827.6,"s":"Neutrals","p":2.08,"c":0},{"n":"Pelior","x":450.3,"y":88.4,"s":"Neutrals","p":0.85,"c":0},{"n":"Oshlin","x":1048.2,"y":382.4,"s":"Noctis","p":0.93,"c":0},{"n":"Presfield","x":905.7,"y":543.6,"s":"Noctis","p":1.16,"c":0},{"n":"Castle","x":1100.5,"y":601.5,"s":"Wighamia","p":3.69,"c":0},{"n":"Midburydon","x":941.9,"y":762.4,"s":"Albrighia","p":3.58,"c":0},{"n":"Fadingley","x":1488.0,"y":666.2,"s":"Wighamia","p":16.01,"c":0},{"n":"Chintefnal","x":866.7,"y":468.9,"s":"Noctis","p":16.94,"c":0},{"n":"Iulilmanaho","x":1023.0,"y":467.6,"s":"Noctis","p":11.64,"c":0},{"n":"Padsted","x":1233.0,"y":620.5,"s":"Wighamia","p":6.1,"c":0},{"n":"Modmin","x":1415.5,"y":639.9,"s":"Wighamia","p":8.29,"c":0},{"n":"Olhanalashe","x":1077.3,"y":489.2,"s":"Noctis","p":6.53,"c":0},{"n":"Bolneton","x":1299.1,"y":673.7,"s":"Wighamia","p":9.79,"c":0},{"n":"Phiggal","x":296.2,"y":184.1,"s":"Athi","p":3.4,"c":0},{"n":"Frampton","x":273.4,"y":327.9,"s":"Athi","p":7.38,"c":0},{"n":"Northested","x":421.0,"y":525.3,"s":"Noctis","p":0.98,"c":0},{"n":"Daltontonce","x":1150.5,"y":514.8,"s":"Wighamia","p":1.0,"c":0},{"n":"Maraford","x":756.8,"y":725.4,"s":"Noctis","p":9.1,"c":0},{"n":"Wargton","x":793.7,"y":444.0,"s":"Elyndor","p":16.18,"c":0},{"n":"Viguregioma","x":417.6,"y":575.4,"s":"Noctis","p":3.57,"c":0},{"n":"Boton","x":814.5,"y":356.2,"s":"Elyndor","p":12.86,"c":0},{"n":"Westclif","x":364.5,"y":397.4,"s":"Athi","p":9.93,"c":0},{"n":"Manchwelne","x":1408.0,"y":645.4,"s":"Wighamia","p":5.09,"c":0},{"n":"Bambemates","x":1263.5,"y":656.4,"s":"Wighamia","p":10.39,"c":0},{"n":"Osfield","x":554.4,"y":408,"s":"Elyndor","p":1.59,"c":0},{"n":"Kirpor","x":670.5,"y":667.3,"s":"Noctis","p":6.96,"c":0},{"n":"Causbone","x":687.8,"y":573.5,"s":"Noctis","p":6.63,"c":0},{"n":"Sudbury","x":1434.1,"y":745.3,"s":"Wighamia","p":1.94,"c":0},{"n":"Whitfordley","x":1336.7,"y":529.3,"s":"Wighamia","p":12.97,"c":0},{"n":"Stansheadbu","x":1070.2,"y":626.6,"s":"Noctis","p":4.97,"c":0},{"n":"Brampsealis","x":1290.4,"y":730.3,"s":"Wighamia","p":5.84,"c":0},{"n":"Portstore","x":898.3,"y":477.5,"s":"Noctis","p":16.93,"c":0},{"n":"Congleham","x":936.6,"y":686.3,"s":"Noctis","p":19.05,"c":0},{"n":"Dodbridge","x":1372.9,"y":645.3,"s":"Wighamia","p":1.61,"c":0},{"n":"Apsearesbu","x":1346.4,"y":520.8,"s":"Wighamia","p":4.19,"c":0},{"n":"Leringle","x":922.0,"y":524.8,"s":"Noctis","p":1.0,"c":0},{"n":"Harling","x":957.9,"y":498.6,"s":"Noctis","p":1.04,"c":0},{"n":"Tredonor","x":1330.2,"y":563.8,"s":"Wighamia","p":6.87,"c":0},{"n":"Atonterton","x":1473.2,"y":620.9,"s":"Wighamia","p":0.86,"c":0},{"n":"Treter","x":518.7,"y":527.1,"s":"Noctis","p":4.25,"c":0},{"n":"Bosterdenbu","x":530.3,"y":379.2,"s":"Noctis","p":0.98,"c":0},{"n":"Harlingley","x":1511.2,"y":593.9,"s":"Wighamia","p":5.13,"c":0},{"n":"Bosheadge","x":897.5,"y":825.1,"s":"Albrighia","p":1.17,"c":0},{"n":"Yhelian","x":973.6,"y":388.2,"s":"Noctis","p":3.06,"c":0},{"n":"Hitchbrid","x":1325.8,"y":704.2,"s":"Wighamia","p":6.38,"c":0},{"n":"Glam","x":438.3,"y":157.1,"s":"Athi","p":0.65,"c":0},{"n":"Botle","x":817.8,"y":347.6,"s":"Elyndor","p":1.72,"c":0},{"n":"Westcking","x":1551.7,"y":641.3,"s":"Wighamia","p":0.91,"c":0},{"n":"Slonas","x":51.2,"y":163.1,"s":"Athi","p":0.42,"c":0},{"n":"Watham","x":1234.4,"y":667.7,"s":"Wighamia","p":10.4,"c":0},{"n":"Watchwel","x":1216.7,"y":464.5,"s":"Wighamia","p":7.53,"c":0},{"n":"Skipseamer","x":1499.2,"y":568.9,"s":"Wighamia","p":12.27,"c":0},{"n":"Fitonrith","x":916.5,"y":776.7,"s":"Albrighia","p":1.47,"c":0},{"n":"Maldock","x":1172.1,"y":436.7,"s":"Wighamia","p":2.26,"c":0},{"n":"Macketonta","x":925.8,"y":483.5,"s":"Noctis","p":8.44,"c":0},{"n":"Winkham","x":1302.9,"y":659.5,"s":"Wighamia","p":9.59,"c":0},{"n":"Quatrere","x":1103.3,"y":795.0,"s":"Albrighia","p":3.09,"c":0},{"n":"Hertham","x":502.5,"y":413.4,"s":"Noctis","p":4.25,"c":0},{"n":"Midfordmin","x":874.1,"y":553.2,"s":"Noctis","p":11.19,"c":0},{"n":"Wishead","x":1193.7,"y":552.0,"s":"Wighamia","p":8.03,"c":0},{"n":"Sidlerenil","x":1297.9,"y":766.5,"s":"Wighamia","p":0.98,"c":0},{"n":"Ormstoney","x":1353.9,"y":814.8,"s":"Wighamia","p":3.75,"c":0},{"n":"Fatesterden","x":674.0,"y":454.3,"s":"Elyndor","p":6.7,"c":0},{"n":"Padsheadley","x":1348.4,"y":753.2,"s":"Wighamia","p":7.48,"c":0},{"n":"Yethtaron","x":937.6,"y":322.2,"s":"Elyndor","p":4.35,"c":0},{"n":"Bosfield","x":427,"y":491.9,"s":"Noctis","p":5.56,"c":0},{"n":"Faliscom","x":290.1,"y":325.8,"s":"Athi","p":5.49,"c":0},{"n":"Louthinrith","x":883.3,"y":819.0,"s":"Albrighia","p":3.06,"c":0},{"n":"Calingra","x":1163.3,"y":287.9,"s":"Wighamia","p":2.4,"c":0},{"n":"Skalt'tes","x":271.1,"y":406.4,"s":"Athi","p":7.42,"c":0},{"n":"Berton","x":686.5,"y":411.2,"s":"Elyndor","p":2.98,"c":0},{"n":"Bridmin","x":1090.3,"y":775.8,"s":"Albrighia","p":1.67,"c":0},{"n":"Darden","x":1009.0,"y":622.6,"s":"Noctis","p":1.14,"c":0},{"n":"Irorum","x":465.7,"y":637.4,"s":"Noctis","p":1.13,"c":0},{"n":"Wodge","x":1003.2,"y":731.3,"s":"Albrighia","p":4.21,"c":0},{"n":"Thelondhilha","x":976.7,"y":328.6,"s":"Elyndor","p":6.73,"c":0},{"n":"Bucham","x":676.0,"y":593.9,"s":"Noctis","p":11.39,"c":0},{"n":"Thetfordbu","x":1469.0,"y":761.8,"s":"Wighamia","p":1.37,"c":0},{"n":"Causter","x":1347.5,"y":565,"s":"Wighamia","p":2.49,"c":0},{"n":"Ryho'andenat","x":853.3,"y":281.0,"s":"Elyndor","p":0.71,"c":0},{"n":"Vespera","x":477.1,"y":305.8,"s":"Elyndor","p":4.47,"c":0},{"n":"Brobury","x":792.0,"y":403.1,"s":"Elyndor","p":2.84,"c":0},{"n":"Imnalin","x":866.2,"y":288.0,"s":"Elyndor","p":2.14,"c":0},{"n":"Colested","x":931.3,"y":689.0,"s":"Noctis","p":15.1,"c":0},{"n":"Seasaltery","x":998.6,"y":790.0,"s":"Albrighia","p":9.76,"c":0},{"n":"Cambrid","x":623.2,"y":533.3,"s":"Noctis","p":1.8,"c":0},{"n":"Watre","x":443.1,"y":533.9,"s":"Noctis","p":12.61,"c":0},{"n":"Ormscom","x":933.5,"y":817.4,"s":"Albrighia","p":2.62,"c":0},{"n":"Shobury","x":811.1,"y":488.1,"s":"Elyndor","p":1.36,"c":0},{"n":"Sealereton","x":538.5,"y":352.1,"s":"Elyndor","p":7.56,"c":0},{"n":"Marlmeham","x":1287.8,"y":572.8,"s":"Wighamia","p":1.5,"c":0},{"n":"Apton","x":736.3,"y":458.5,"s":"Elyndor","p":0.97,"c":0},{"n":"Binerid","x":647.5,"y":670.3,"s":"Noctis","p":10.8,"c":0},{"n":"Fokerington","x":1312.2,"y":813.6,"s":"Wighamia","p":0.87,"c":0},{"n":"Dheubpurclessi","x":470.5,"y":68.4,"s":"Neutrals","p":2.01,"c":0},{"n":"Kandee","x":1049.6,"y":483.3,"s":"Noctis","p":0.98,"c":0},{"n":"Clitnestole","x":1225.3,"y":422.2,"s":"Wighamia","p":1.76,"c":0},{"n":"Cleovilton","x":755.6,"y":499.9,"s":"Elyndor","p":2.54,"c":0},{"n":"Nabil","x":1516.8,"y":763.7,"s":"Wighamia","p":11.16,"c":0},{"n":"Theltliaq","x":56.4,"y":104.2,"s":"Athi","p":1.07,"c":0},{"n":"Amnesthas","x":1052.0,"y":391.4,"s":"Noctis","p":0.53,"c":0},{"n":"Chilter","x":779.3,"y":772,"s":"Noctis","p":9.8,"c":0},{"n":"Ollmselosa","x":1005.2,"y":300.3,"s":"Wighamia","p":7.68,"c":0},{"n":"Castle","x":569.4,"y":429.2,"s":"Elyndor","p":12.27,"c":0},{"n":"Albrid","x":721.2,"y":615.3,"s":"Noctis","p":6.4,"c":0},{"n":"Alblerid","x":994.5,"y":775.4,"s":"Albrighia","p":7.35,"c":0},{"n":"Trehoneho","x":1141.5,"y":513.8,"s":"Wighamia","p":1.09,"c":0},{"n":"Blandgewes","x":526.1,"y":534.5,"s":"Noctis","p":1.01,"c":0}]};
+
+(function(){
+  const viewport = document.getElementById('map-viewport');
+  const canvas = document.getElementById('map-canvas');
+  const img = document.getElementById('map-base-img');
+  const labelsContainer = document.getElementById('map-labels');
+  const listContainer = document.getElementById('map-city-list');
+  const searchInput = document.getElementById('map-search');
+  const zoomInBtn = document.getElementById('map-zoom-in');
+  const zoomOutBtn = document.getElementById('map-zoom-out');
+  const zoomResetBtn = document.getElementById('map-zoom-reset');
+  if(!viewport) return;
+
+  let initialized = false;
+  let scale = 1, fitScale = 1, minScale = 1, maxScale = 1;
+  let tx = 0, ty = 0;
+  let dragging = false, moved = false, dragStartX=0, dragStartY=0, txStart=0, tyStart=0;
+  let labelEls = [];
+
+  function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+
+  function applyTransform(){
+    canvas.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + scale + ')';
+    updateLabels();
+  }
+
+  function fitToViewport(){
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    fitScale = Math.min(vw / MAP_DATA.width, vh / MAP_DATA.height);
+    minScale = fitScale * 0.9;
+    maxScale = fitScale * 14;
+    scale = fitScale;
+    tx = (vw - MAP_DATA.width*scale)/2;
+    ty = (vh - MAP_DATA.height*scale)/2;
+    applyTransform();
+  }
+
+  function buildLabels(){
+    const frag = document.createDocumentFragment();
+    MAP_DATA.burgs.forEach(b => {
+      const el = document.createElement('div');
+      el.className = 'city-label' + (b.c ? ' capital' : '');
+      el.style.left = b.x + 'px';
+      el.style.top = b.y + 'px';
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      const label = document.createElement('span');
+      label.textContent = b.n;
+      el.appendChild(dot); el.appendChild(label);
+      el._pop = b.p; el._cap = b.c;
+      frag.appendChild(el);
+      labelEls.push(el);
+    });
+    labelsContainer.appendChild(frag);
+  }
+
+  function updateLabels(){
+    labelEls.forEach(el => {
+      let threshold;
+      if(el._cap) threshold = minScale;
+      else if(el._pop >= 15) threshold = fitScale * 1.6;
+      else if(el._pop >= 8) threshold = fitScale * 3.2;
+      else if(el._pop >= 3) threshold = fitScale * 5.5;
+      else threshold = fitScale * 9;
+      const shouldShow = scale >= threshold;
+      if(shouldShow !== el.classList.contains('show')){
+        el.classList.toggle('show', shouldShow);
+      }
+    });
+  }
+
+  function buildList(){
+    const groups = {};
+    MAP_DATA.burgs.forEach(b => {
+      (groups[b.s] = groups[b.s] || []).push(b);
+    });
+    const priority = ['Elyndor','Noctis'];
+    const others = Object.keys(groups).filter(k => !priority.includes(k)).sort();
+    const allKeys = priority.concat(others);
+    listContainer.innerHTML = '';
+    allKeys.forEach(key => {
+      if(!groups[key]) return;
+      const items = groups[key].slice().sort((a,b)=>b.p-a.p).slice(0,60);
+      const title = document.createElement('div');
+      title.className = 'map-city-group-title';
+      title.textContent = key;
+      listContainer.appendChild(title);
+      items.forEach(b => {
+        const row = document.createElement('div');
+        row.className = 'map-city-item';
+        const name = document.createElement('span');
+        name.textContent = b.n;
+        row.appendChild(name);
+        if(b.c){
+          const tag = document.createElement('span');
+          tag.className = 'cap';
+          tag.textContent = 'Capitale';
+          row.appendChild(tag);
+        }
+        row.addEventListener('click', () => goToCity(b));
+        listContainer.appendChild(row);
+      });
+    });
+  }
+
+  function goToCity(b, targetScale){
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    scale = clamp(targetScale || fitScale * 6, minScale, maxScale);
+    tx = vw/2 - b.x*scale;
+    ty = vh/2 - b.y*scale;
+    canvas.style.transition = 'transform .5s ease';
+    applyTransform();
+    setTimeout(()=>{ canvas.style.transition=''; }, 500);
+  }
+
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = viewport.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const delta = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const newScale = clamp(scale * delta, minScale, maxScale);
+    const wx = (mx - tx) / scale, wy = (my - ty) / scale;
+    tx = mx - wx*newScale;
+    ty = my - wy*newScale;
+    scale = newScale;
+    applyTransform();
+  }, { passive:false });
+
+  viewport.addEventListener('mousedown', (e) => {
+    dragging = true; moved = false;
+    viewport.classList.add('dragging');
+    dragStartX = e.clientX; dragStartY = e.clientY;
+    txStart = tx; tyStart = ty;
+  });
+  window.addEventListener('mousemove', (e) => {
+    if(!dragging) return;
+    if(Math.abs(e.clientX-dragStartX) > 2 || Math.abs(e.clientY-dragStartY) > 2) moved = true;
+    tx = txStart + (e.clientX - dragStartX);
+    ty = tyStart + (e.clientY - dragStartY);
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => { dragging=false; viewport.classList.remove('dragging'); });
+
+  viewport.addEventListener('touchstart', (e)=>{
+    if(e.touches.length===1){
+      dragging = true;
+      dragStartX = e.touches[0].clientX; dragStartY = e.touches[0].clientY;
+      txStart = tx; tyStart = ty;
+    }
+  }, {passive:true});
+  viewport.addEventListener('touchmove', (e)=>{
+    if(dragging && e.touches.length===1){
+      tx = txStart + (e.touches[0].clientX - dragStartX);
+      ty = tyStart + (e.touches[0].clientY - dragStartY);
+      applyTransform();
+    }
+  }, {passive:true});
+  viewport.addEventListener('touchend', ()=>{ dragging=false; });
+
+  function zoomStep(factor){
+    const vw = viewport.clientWidth, vh = viewport.clientHeight;
+    const newScale = clamp(scale*factor, minScale, maxScale);
+    const wx = (vw/2 - tx)/scale, wy = (vh/2 - ty)/scale;
+    tx = vw/2 - wx*newScale; ty = vh/2 - wy*newScale;
+    scale = newScale; applyTransform();
+  }
+  zoomInBtn.addEventListener('click', () => zoomStep(1.4));
+  zoomOutBtn.addEventListener('click', () => zoomStep(1/1.4));
+  zoomResetBtn.addEventListener('click', fitToViewport);
+
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if(!q){ buildList(); return; }
+    const matches = MAP_DATA.burgs.filter(b => b.n.toLowerCase().includes(q)).sort((a,b)=>b.p-a.p).slice(0,80);
+    listContainer.innerHTML = '';
+    if(matches.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'map-city-empty';
+      empty.textContent = 'Aucune ville trouvée.';
+      listContainer.appendChild(empty);
+      return;
+    }
+    matches.forEach(b => {
+      const row = document.createElement('div');
+      row.className = 'map-city-item';
+      const name = document.createElement('span');
+      name.textContent = b.n;
+      const state = document.createElement('span');
+      state.className = 'cap';
+      state.textContent = b.s;
+      row.appendChild(name); row.appendChild(state);
+      row.addEventListener('click', () => goToCity(b));
+      listContainer.appendChild(row);
+    });
+  });
+
+  function initMap(){
+    if(initialized) return;
+    initialized = true;
+    canvas.style.width = MAP_DATA.width + 'px';
+    canvas.style.height = MAP_DATA.height + 'px';
+    img.style.width = MAP_DATA.width + 'px';
+    img.style.height = MAP_DATA.height + 'px';
+    buildLabels();
+    buildList();
+    requestAnimationFrame(fitToViewport);
+  }
+
+  document.querySelectorAll('[data-goto="carte-interactive"]').forEach(btn=>{
+    btn.addEventListener('click', () => setTimeout(initMap, 60));
+  });
+  window.addEventListener('resize', () => { if(initialized) fitToViewport(); });
+})();
 </script>
 
 </body>
